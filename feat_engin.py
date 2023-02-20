@@ -54,7 +54,7 @@ def get_answer_time_1(df, train=True):
     return df
 
 
-
+    
 def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, s_room_fqid=None,  e_room_fqid=None, train=True, num_id=-1):
     
     if train:
@@ -97,29 +97,57 @@ def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, 
     
     # For inference
     else:
-        #try:
         if s_room_fqid == None or e_room_fqid == None:
-            s_index = df.loc[(df['level'] == s_level) & (df['text_fqid'] == s_text_fqid), 'index'].idxmin()
-            e_index = df.loc[(df['level'] == e_level) & (df['text_fqid'] == e_text_fqid), 'index'].idxmax()
-
-
+            column = 'text_fqid'
+            start_condition = s_text_fqid
+            end_condition = e_text_fqid
         elif s_text_fqid == None or e_text_fqid == None:
-            s_index = df.loc[(df['level'] == s_level) & (df['room_fqid'] == s_room_fqid), 'index'].idxmin()
-            e_index = df.loc[(df['level'] == e_level) & (df['room_fqid'] == e_room_fqid), 'index'].idxmax()
-
-
+            column = 'room_fqid'
+            start_condition = s_room_fqid
+            end_condition = e_room_fqid
         elif s_room_fqid != None and e_room_fqid != None and s_text_fqid != None and e_text_fqid != None:
-            s_cri = (df['level'] == s_level) & (df['text_fqid'] == s_text_fqid)
-            e_cri = (df['level'] == e_level) & (df['text_fqid'] == e_text_fqid)
-            
-            if len(df.loc[s_cri, 'index']) != 0 and len(df.loc[e_cri, 'index']) != 0:
-                s_index = df.loc[(df['level'] == s_level) & (df['text_fqid'] == s_text_fqid), 'index'].idxmin()
-                e_index = df.loc[(df['level'] == e_level) & (df['text_fqid'] == e_text_fqid), 'index'].idxmax()
-            else:
-                s_index = df.loc[(df['level'] == s_level) & (df['room_fqid'] == s_room_fqid), 'index'].idxmin()
-                e_index = df.loc[(df['level'] == e_level) & (df['room_fqid'] == e_room_fqid), 'index'].idxmax()
+            column = None
+        else:
+            raise Exception("Provide either text_fqid or room_fqid")
         
-        #except: s_index = df.index[0]  // e_index = df.index[-1]
+        if column is not None:
+            s_cri = (df['level'] == s_level) & (df[column] == start_condition)
+            e_cri = (df['level'] == e_level) & (df[column] == end_condition)
+
+            if len(df.loc[s_cri, 'index']) != 0 and len(df.loc[e_cri, 'index']) != 0:
+                s_index = df.loc[s_cri, 'index'].idxmin()
+                e_index = df.loc[e_cri, 'index'].idxmax()
+                
+            elif len(df.loc[df['level'] == s_level, 'index']) != 0 and len(df.loc[df['level'] == e_level, 'index']) != 0:
+                s_index = df.loc[df['level'] == s_level, 'index'].idxmin()
+                e_index = df.loc[df['level'] == e_level, 'index'].idxmax()
+            else:
+                s_index = df.index[0]
+                e_index = df.index[-1]
+
+            
+        else:
+            s_cri_1 = (df['level'] == s_level) & (df['text_fqid'] == s_text_fqid)
+            e_cri_1 = (df['level'] == e_level) & (df['text_fqid'] == e_text_fqid)
+            
+            s_cri_2 = (df['level'] == s_level) & (df['room_fqid'] == s_room_fqid)
+            e_cri_2 = (df['level'] == e_level) & (df['room_fqid'] == e_room_fqid)
+            
+            if len(df.loc[s_cri_1, 'index']) != 0 and len(df.loc[e_cri_1, 'index']) != 0:
+                s_index = df.loc[s_cri_1, 'index'].idxmin()
+                e_index = df.loc[e_cri_1, 'index'].idxmax()
+                
+            elif len(df.loc[s_cri_2, 'index']) != 0 and len(df.loc[e_cri_2, 'index']) != 0:
+                s_index = df.loc[s_cri_2, 'index'].idxmin()
+                e_index = df.loc[e_cri_2, 'index'].idxmax()
+                
+            elif len(df.loc[df['level'] == s_level, 'index']) != 0 and len(df.loc[df['level'] == e_level, 'index']) != 0:
+                s_index = df.loc[df['level'] == s_level, 'index'].idxmin()
+                e_index = df.loc[df['level'] == e_level, 'index'].idxmax()
+            else:
+                s_index = df.index[0]
+                e_index = df.index[-1]
+
 
         df = df.iloc[s_index:e_index].reset_index(drop=True)
         time_taken = df['elapsed_time'].iloc[-1] - df['elapsed_time'].iloc[0]
