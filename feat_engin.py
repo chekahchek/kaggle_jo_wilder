@@ -53,7 +53,7 @@ def get_answer_time_1(df, train=True):
     if train:
         df = df.groupby('session_id')[['session_id', 'answer_time_1']].head(1).reset_index(drop=True)
     else:
-        df = df[['answer_time_1']].head(1)
+        df = df[['answer_time_1']].head(1).reset_index(drop=True)
     return df
 
 
