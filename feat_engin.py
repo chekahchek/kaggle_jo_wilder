@@ -49,8 +49,11 @@ def get_answer_time_1(df, train=True):
     df['answer_time_1'] = df.groupby('session_id')['elapsed_time'].shift(1)
     df['answer_time_1'] = df['elapsed_time'] - df['answer_time_1']
     df = df.loc[df['answer_time_1'].notna(), :]
-
-    df = df.groupby('session_id')[['session_id', 'answer_time_1']].head(1).reset_index(drop=True)
+    
+    if train:
+        df = df.groupby('session_id')[['session_id', 'answer_time_1']].head(1).reset_index(drop=True)
+    else:
+        df = df[['answer_time_1']].head(1)
     return df
 
 
