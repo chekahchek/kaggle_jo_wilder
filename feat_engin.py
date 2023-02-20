@@ -164,14 +164,14 @@ def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, 
         
         if rm_count:
             room_uniq_count = df['room_fqid'].nunique()
-            out = pd.DataFrame({f'time_taken_{str(num_id)}' : time_taken, 
-                                f'event_counts_{str(num_id)}' : event_count,
-                                f'room_unique_count_{str(num_id)}' : room_uniq_count},
+            out = pd.DataFrame({f'event_counts_{str(num_id)}' : event_count,
+                                f'room_unique_count_{str(num_id)}' : room_uniq_count,
+                                f'time_taken_{str(num_id)}' : time_taken}, 
                                 index=[0])
                              
         else:
-            out = pd.DataFrame({f'time_taken_{str(num_id)}' : time_taken, 
-                                f'event_counts_{str(num_id)}' : event_count}, 
+            out = pd.DataFrame({f'event_counts_{str(num_id)}' : event_count,
+                                f'time_taken_{str(num_id)}' : time_taken}, 
                                 index=[0])
             
         return out
