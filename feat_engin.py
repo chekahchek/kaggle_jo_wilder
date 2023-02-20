@@ -55,7 +55,7 @@ def get_answer_time_1(df, train=True):
 
 
     
-def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, s_room_fqid=None,  e_room_fqid=None, train=True, num_id=-1):
+def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, s_room_fqid=None,  e_room_fqid=None, train=True, rm_count=False, num_id=-1):
     
     if train:
         print(f"Num of sess_id at the start for {num_id}: {df['session_id'].nunique()}")
@@ -84,13 +84,19 @@ def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, 
         df.loc[df['end_index'] == False, 'end_index'] = np.NaN
         df['keep'] = df.groupby('session_id').apply(lambda x: (x['index'] >= x['start_index'].min()) & (x['index'] <= x['end_index'].max())).values
         df = df.loc[df['keep'], ['session_id', 'elapsed_time', 'event_name', 'room_fqid']]
-
-        out = df.groupby('session_id').agg(event_counts=('event_name', 'count')) #, room_unique_count=('room_fqid', 'nunique'))
-        out['time_taken'] = df.groupby('session_id').nth(-1)['elapsed_time'] - df.groupby('session_id').nth(0)['elapsed_time']
-        out = out.rename(columns={'time_taken' : f'time_taken_{str(num_id)}', 
-                                  'event_counts' : f'event_counts_{str(num_id)}', 
-                                  #'room_unique_count' : f'room_unique_count_{str(num_id)}'
-                                 })
+        
+        
+        if rm_count:
+            out = df.groupby('session_id').agg(event_counts=('event_name', 'count'), room_unique_count=('room_fqid', 'nunique'))
+            out = out.rename(columns={'event_counts' : f'event_counts_{str(num_id)}', 
+                                      'room_unique_count' : f'room_unique_count_{str(num_id)}'
+                                     })
+        else:
+            out = df.groupby('session_id').agg(event_counts=('event_name', 'count'))
+            out = out.rename(columns={'event_counts' : f'event_counts_{str(num_id)}'})
+        
+        out[f'time_taken_{str(num_id)}'] = df.groupby('session_id').nth(-1)['elapsed_time'] - df.groupby('session_id').nth(0)['elapsed_time']
+    
         print(f"Num of sess_id at the end for {num_id}: {len(out)}")
 
         return out.reset_index()
@@ -152,13 +158,17 @@ def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, 
         df = df.iloc[s_index:e_index].reset_index(drop=True)
         time_taken = df['elapsed_time'].iloc[-1] - df['elapsed_time'].iloc[0]
         event_count = df['event_name'].count()
-        #room_uniq_count = df['room_fqid'].nunique()
-        #sess = df.loc[0, 'session_id']
-
-        out = pd.DataFrame({f'time_taken_{str(num_id)}' : time_taken, 
-                            f'event_counts_{str(num_id)}' : event_count}, 
-                            index=[0])
-                            #f'room_unique_count_{str(num_id)}' : room_uniq_count}, 
-                           
+        
+        if rm_count:
+            room_uniq_count = df['room_fqid'].nunique()
+            out = pd.DataFrame({f'time_taken_{str(num_id)}' : time_taken, 
+                                f'event_counts_{str(num_id)}' : event_count,
+                                f'room_unique_count_{str(num_id)}' : room_uniq_count},
+                                index=[0])
+                             
+        else:
+            out = pd.DataFrame({f'time_taken_{str(num_id)}' : time_taken, 
+                                f'event_counts_{str(num_id)}' : event_count}, 
+                                index=[0])
             
         return out
