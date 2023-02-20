@@ -156,8 +156,9 @@ def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, 
         #sess = df.loc[0, 'session_id']
 
         out = pd.DataFrame({f'time_taken_{str(num_id)}' : time_taken, 
-                            f'event_counts_{str(num_id)}' : event_count, 
+                            f'event_counts_{str(num_id)}' : event_count}, 
+                            index=[0])
                             #f'room_unique_count_{str(num_id)}' : room_uniq_count}, 
-                           index=[0])
+                           
             
         return out
