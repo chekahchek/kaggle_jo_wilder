@@ -1,0 +1,39 @@
+{
+  "id": "chekhui/jo-wilder-code",
+  "id_no": 2916543,
+  "datasetSlugNullable": "jo-wilder-code",
+  "ownerUserNullable": "chekhui",
+  "usabilityRatingNullable": 0.125,
+  "titleNullable": "jo-wilder-code",
+  "subtitleNullable": "",
+  "descriptionNullable": "",
+  "datasetId": 2916543,
+  "datasetSlug": "jo-wilder-code",
+  "hasDatasetSlug": true,
+  "ownerUser": "chekhui",
+  "hasOwnerUser": true,
+  "usabilityRating": 0.125,
+  "hasUsabilityRating": true,
+  "totalViews": 15,
+  "totalVotes": 0,
+  "totalDownloads": 1,
+  "title": "jo-wilder-code",
+  "hasTitle": true,
+  "subtitle": "",
+  "hasSubtitle": true,
+  "description": "",
+  "hasDescription": true,
+  "isPrivate": true,
+  "keywords": [
+    "movies and tv shows"
+  ],
+  "licenses": [
+    {
+      "nameNullable": "unknown",
+      "name": "unknown",
+      "hasName": true
+    }
+  ],
+  "collaborators": [],
+  "data": []
+}
