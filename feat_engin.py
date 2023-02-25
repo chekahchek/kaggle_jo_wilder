@@ -13,18 +13,33 @@ def get_general_features(df):
     tmp = df.groupby('session_id')['elapsed_time'].sum()
     tmp.name = 'total_elapsed_time'
     dfs.append(tmp)
-
-    # 3 - Total hover duration
+    
+    # 3 - Mean elapsed time 
+    tmp = df.groupby('session_id')['elapsed_time'].mean()
+    tmp.name = 'mean_elapsed_time'
+    dfs.append(tmp)
+    
+    # 4 - Std Dev elapsed time 
+    tmp = df.groupby('session_id')['elapsed_time'].std()
+    tmp.name = 'stddev_elapsed_time'
+    dfs.append(tmp)
+    
+    # 5 - Average Time per action
+    tmp = df.groupby('session_id')['elapsed_time'].max() / df.groupby('session_id').size()
+    tmp.name = 'time_per_action'
+    dfs.append(tmp)
+    
+    # 6 - Total hover duration
     tmp = df.groupby('session_id')['hover_duration'].sum()
     tmp.name = 'total_hover_duration'
     dfs.append(tmp)
 
-    # 4 - Number of times notebook open
+    # 7 - Number of times notebook open
     tmp = df.loc[df['event_name']  == 'notebook_click', :].groupby('session_id')['event_name'].count()
     tmp.name = 'total_notebook_click'
     dfs.append(tmp)
 
-    # 5 - Time spent for each event_name
+    # 8 - Time spent for each event_name
     EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
     for event_name in EVENT_NAMES:
         tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['elapsed_time'].sum()
@@ -32,6 +47,14 @@ def get_general_features(df):
         dfs.append(tmp)
 
     train = pd.concat(dfs,axis=1).reset_index()
+    
+    # 9 - Time per level
+    tmp = (df.groupby(['session_id', 'level'])[['elapsed_time']].max() - df.groupby(['session_id', 'level'])[['elapsed_time']].min())
+    tmp = tmp.reset_index().pivot_table(index='session_id', values='elapsed_time', columns='level').reset_index()
+    col_names = {col: f"lvl_{col}_time" for col in tmp.columns if col != 'session_id'}
+    tmp = tmp.rename(columns=col_names)
+    
+    train = pd.merge(left=train, right=tmp, on='session_id', how='left')
     return train
 
 
@@ -175,3 +198,53 @@ def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, 
                                 index=[0])
             
         return out
+    
+
+def arrow_click(df, substring, name):
+    """
+    For events where user has to click through multiple pages before selecting the correct one. 
+    cri = Filtering for situation where the user is navigating through all the different pages. Doesm't incldue the navigate click to take them into the scren,
+    closing the event screen but include the bingo and the amount of hovering done
+    cri_time = Filtering for situation where user must first navigate into the screen all the way till bingo (inclusive). This is done to find out the 
+               amount of time on the event itself.
+    
+    Stage 2 - Business card : substring = 'businesscards', name = 'bizcard'
+    Stage 2 - Microfiche : substring = 'reader', name = 'microfiche'
+    Stage 2 - Stacks : substring = 'journals.pic', name = 'stackjournals'
+    """
+    
+    df['substring'] = df['fqid'].str.contains(substring)
+    cri = (df['substring']) & (df['event_name'] != 'navigate_click') & (df['name'] != 'close')
+    cri_time = (df['substring']) & (df['name'] != 'close')
+    
+    df[name] = cri.astype(int)
+    tmp = df.groupby('session_id')[[name]].sum()
+    
+    tmp2 = df.loc[cri_time, :].groupby('session_id')[['elapsed_time']].max() - df.loc[cri_time, :].groupby('session_id')[['elapsed_time']].min()
+    out = pd.merge(tmp, tmp2, left_index=True, right_index=True, how='left').reset_index().rename(columns={'elapsed_time' : f'{name}_elapsed_time'})
+
+
+
+def point_click(df, fqid, fqid_bingo, name):
+    """
+    For events where user has to click on the correct option in the entire page. 
+    cri = Filtering for situation where the user is clicking on the correct option. Doesn't include the navigate click to take them into the screen,
+          closing the event screen, or the bingo but include the amount of hovering done
+    cri_time = Filtering for situation where user must first navigate into the screen all the way till bingo (inclusive). This is done to find out the 
+               amount of time on the event itself.
+    
+    Stage 1 - Plaque : fqid = 'plaque', bingo_fqid = 'plaque.face.date', name = 'plaque_clicks'
+    Stage 2 - Logbooks : fqid = 'logbook', bingo_fqid = 'logbook.page.bingo', name = 'logbook_clicks'
+    Stage 3 - Directory : fqid = 'directory', bingo_fqid = 'directory.closeup.archivist', name = 'directory_specs'
+    """
+    cri = (df['fqid'] == fqid) & (df['event_name'] != 'navigate_click') & (df['name'] != 'close')
+    cri_time = ((df['fqid'] == fqid) | (df['fqid'] == bingo_fqid)) & (df['name'] != 'close')
+    
+    df[name] = (cri).astype(int)
+    tmp = df.groupby('session_id')[[name]].sum()
+    
+    tmp2 = df.loc[cri_time, :].groupby('session_id')[['elapsed_time']].max() - df.loc[cri_time, :].groupby('session_id')[['elapsed_time']].min()
+    out = pd.merge(tmp, tmp2, left_index=True, right_index=True, how='left').reset_index().rename(columns={'elapsed_time' : f'{name}_elapsed_time'})
+    
+    return out
+    
