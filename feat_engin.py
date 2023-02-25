@@ -211,6 +211,8 @@ def arrow_click(df, substring, name):
     Stage 2 - Business card : substring = 'businesscards', name = 'bizcard'
     Stage 2 - Microfiche : substring = 'reader', name = 'microfiche'
     Stage 2 - Stacks : substring = 'journals.pic', name = 'stackjournals'
+    Stage 3 - Ecology flag in the microfiche : substring = 'reader_flag', name = 'readerflag'
+    Stage 3 - Activist in front of flag: substring = 'journals_flag', name = 'activistflag'
     """
     
     df['substring'] = df['fqid'].str.contains(substring)
@@ -222,7 +224,7 @@ def arrow_click(df, substring, name):
     
     tmp2 = df.loc[cri_time, :].groupby('session_id')[['elapsed_time']].max() - df.loc[cri_time, :].groupby('session_id')[['elapsed_time']].min()
     out = pd.merge(tmp, tmp2, left_index=True, right_index=True, how='left').reset_index().rename(columns={'elapsed_time' : f'{name}_elapsed_time'})
-
+    return out
 
 
 def point_click(df, fqid, fqid_bingo, name):
