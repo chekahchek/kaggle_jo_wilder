@@ -77,6 +77,8 @@ def get_answer_time_1(df, train=True):
         df = df.groupby('session_id')[['session_id', 'answer_time_1']].head(1).reset_index(drop=True)
     else:
         df = df[['answer_time_1']].head(1).reset_index(drop=True)
+        
+    df['answer_time_1'] = df['answer_time_1'].clip(upper=50000) 
     return df
 
 
