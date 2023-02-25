@@ -240,7 +240,7 @@ def point_click(df, fqid, fqid_bingo, name):
     Stage 3 - Directory : fqid = 'directory', bingo_fqid = 'directory.closeup.archivist', name = 'directory_specs'
     """
     cri = (df['fqid'] == fqid) & (df['event_name'] != 'navigate_click') & (df['name'] != 'close')
-    cri_time = ((df['fqid'] == fqid) | (df['fqid'] == bingo_fqid)) & (df['name'] != 'close')
+    cri_time = ((df['fqid'] == fqid) | (df['fqid'] == fqid_bingo)) & (df['name'] != 'close')
     
     df[name] = (cri).astype(int)
     tmp = df.groupby('session_id')[[name]].sum()
