@@ -46,17 +46,13 @@ def get_general_features(df, stage, train=True):
         tmp.name = event_name + '_time'
         dfs.append(tmp)
 
-    train = pd.concat(dfs,axis=1).reset_index()
+    _train = pd.concat(dfs,axis=1).reset_index()
     
     # 9 - Time per level
     tmp = (df.groupby(['session_id', 'level'])[['elapsed_time']].max() - df.groupby(['session_id', 'level'])[['elapsed_time']].min())
     tmp = tmp.reset_index().pivot_table(index='session_id', values='elapsed_time', columns='level').reset_index()
     col_names = {col: f"lvl_{col}_time" for col in tmp.columns if col != 'session_id'}
     tmp = tmp.rename(columns=col_names)
-    
-    display(tmp)
-    print(train)
-    print(stage)
     
     if train == False:
         if stage == 1 and len(tmp.columns) != 6:
@@ -80,8 +76,8 @@ def get_general_features(df, stage, train=True):
                     tmp[lvl_col] = 0
             tmp = tmp[['session_id'] + [f"lvl_{i}_time" for i in range(13,23)]]
     
-    train = pd.merge(left=train, right=tmp, on='session_id', how='left')
-    return train
+    _train = pd.merge(left=_train, right=tmp, on='session_id', how='left')
+    return _train
 
 
 
