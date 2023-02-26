@@ -54,6 +54,10 @@ def get_general_features(df, stage, train=True):
     col_names = {col: f"lvl_{col}_time" for col in tmp.columns if col != 'session_id'}
     tmp = tmp.rename(columns=col_names)
     
+    display(tmp)
+    print(train)
+    print(stage)
+    
     if train == False:
         if stage == 1 and len(tmp.columns) != 6:
             for lvl in range(0, 5):
