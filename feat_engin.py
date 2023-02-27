@@ -10,7 +10,7 @@ def get_general_features(df, stage, train=True):
     dfs.append(tmp)
 
     # 2 - Total elapsed time
-    tmp = df.groupby('session_id')['elapsed_time'].sum()
+    tmp = df.groupby('session_id')['elapsed_time'].max()
     tmp.name = 'total_elapsed_time'
     dfs.append(tmp)
     
@@ -42,7 +42,7 @@ def get_general_features(df, stage, train=True):
     # 8 - Time spent for each event_name
     EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
     for event_name in EVENT_NAMES:
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['elapsed_time'].sum()
+        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].sum()
         tmp.name = event_name + '_time'
         dfs.append(tmp)
 
@@ -91,16 +91,16 @@ def get_answer_time_1(df, train=True):
     else:
         df = df.loc[df['keep'], :]
 
-    df['answer_time_1'] = df.groupby('session_id')['elapsed_time'].shift(1)
-    df['answer_time_1'] = df['elapsed_time'] - df['answer_time_1']
-    df = df.loc[df['answer_time_1'].notna(), :]
+    #df['answer_time_1'] = df.groupby('session_id')['elapsed_time'].shift(1)
+    #df['answer_time_1'] = df['elapsed_time'] - df['answer_time_1']
+    #df = df.loc[df['answer_time_1'].notna(), :]
     
     if train:
-        df = df.groupby('session_id')[['session_id', 'answer_time_1']].head(1).reset_index(drop=True)
+        df = df.groupby('session_id')[['session_id', 'action_time']].head(1).reset_index(drop=True)
     else:
-        df = df[['answer_time_1']].head(1).reset_index(drop=True)
+        df = df[['action_time']].head(1).reset_index(drop=True)
         
-    df['answer_time_1'] = df['answer_time_1'].clip(upper=50000) 
+    df['answer_time_1'] = df['action_time'].clip(upper=50000) 
     return df
 
 
