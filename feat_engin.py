@@ -91,16 +91,13 @@ def get_answer_time_1(df, train=True):
     else:
         df = df.loc[df['keep'], :]
 
-    #df['answer_time_1'] = df.groupby('session_id')['elapsed_time'].shift(1)
-    #df['answer_time_1'] = df['elapsed_time'] - df['answer_time_1']
-    #df = df.loc[df['answer_time_1'].notna(), :]
-    
     if train:
         df = df.groupby('session_id')[['session_id', 'action_time']].head(1).reset_index(drop=True)
     else:
         df = df[['action_time']].head(1).reset_index(drop=True)
         
-    df['answer_time_1'] = df['action_time'].clip(upper=50000) 
+    df['action_time'] = df['action_time'].clip(upper=50000) 
+    df = df.rename(columns={'action_time' : 'answer_time_1'})
     return df
 
 
