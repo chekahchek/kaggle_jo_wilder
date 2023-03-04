@@ -101,6 +101,26 @@ def get_answer_time_1(df, train=True):
     return df
 
 
+def get_answer_time_2(stage3_df, stage2_path=None, retained_features=None, train=True):
+    if train:
+        data = pd.read_csv(stage2_path, dtype=dtypes, usecols=cols)
+        stage2_answertime = data.groupby('session_id').nth(-1)[['elapsed_time']]
+        stage3_answertime = stage3_df.groupby('session_id').nth(0)[['elapsed_time']]
+
+        out = pd.merge(stage3_answertime, stage2_answertime, left_index=True, right_index=True, how='left')
+        out['answer_time_2'] = out['elapsed_time_x'] - out['elapsed_time_y']
+        out['answer_time_2'] = out['answer_time_2'].clip(lower=0)
+        out = out['answer_time_2'].reset_index()
+        
+    else:
+        sess = stage3_df['session_id'].iloc[0]
+        stage2_answertime = retained_features[sess]['stage2_answertime']
+        stage3_answertime = stage3_df['elapsed_time'].iloc[0]
+        answer_time_2 = stage3_answertime - stage2_answertime
+        if answer_time_2 < 0: answer_time_2 = 0
+        out = pd.DataFrame({'answer_time_2': answer_time_2}, index=[0])
+        
+    return out
     
 def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, s_room_fqid=None,  e_room_fqid=None, train=True, rm_count=False, num_id=-1):
     
