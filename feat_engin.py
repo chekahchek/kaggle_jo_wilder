@@ -121,6 +121,17 @@ def get_answer_time_2(stage3_df, stage2_path=None, retained_features=None, train
         out = pd.DataFrame({'answer_time_2': answer_time_2}, index=[0])
         
     return out
+
+
+def get_datetime_feat(data):
+
+    data["year"] = data["session_id"].apply(lambda x: int(str(x)[:2])).astype(np.uint8)
+    data["month"] = data["session_id"].apply(lambda x: int(str(x)[2:4]) + 1).astype(np.uint8)
+    data["weekday"] = data["session_id"].apply(lambda x: int(str(x)[4:6])).astype(np.uint8)
+    data['weekend'] = ((data['weekday'] == 0) | (data['weekday'] == 1)).astype(int)
+    data["hour"] = data["session_id"].apply(lambda x: int(str(x)[6:8])).astype(np.uint8)
+    
+    return data
     
 def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, s_room_fqid=None,  e_room_fqid=None, train=True, rm_count=False, num_id=-1):
     
