@@ -301,4 +301,31 @@ def point_click(df, fqid, fqid_bingo, name):
     out = pd.merge(tmp, tmp2, left_index=True, right_index=True, how='left').reset_index().rename(columns={'elapsed_time' : f'{name}_elapsed_time'})
     
     return out
+
+
+def game_version(data):
+    
+    cri = (data['text'].str.contains("because history is boring!")) | (data['text'].str.contains("Meetings are BORING!"))
+    original = cri.fillna(False).astype(int).sum()
+
+    cri = (data['text'].str.contains("Ugh. Meetings are so boring")) | (data['text'].str.contains("Do I have to?"))
+    no_humour = cri.fillna(False).astype(int).sum()
+
+    cri = data['text'].str.contains("Yes! This cool old slip from 1916")
+    no_snark = cri.fillna(False).astype(int).sum()
+
+    cri = (data['text'].str.contains("Yes! This old slip from 1916.")) | (data['text'].str.contains("Sure!"))
+    dry = cri.fillna(False).astype(int).sum()
+    
+    if dry > 0:
+        label = 3 
+    elif no_snark > 0:
+        label = 2
+    elif no_humour > 0:
+        label = 1
+    else:
+        label = 0
+        
+    return pd.DataFrame({'version': label}, index=[0])
+
     
