@@ -103,7 +103,7 @@ def get_answer_time_1(df, train=True):
 
 def get_answer_time_2(stage3_df, stage2_path=None, retained_features=None, train=True):
     if train:
-        data = pd.read_csv(stage2_path)
+        data = pd.read_csv(stage2_path, dtype={'session_id':'object', 'elapsed_time':np.int32})
         stage2_answertime = data.groupby('session_id').nth(-1)[['elapsed_time']]
         stage3_answertime = stage3_df.groupby('session_id').nth(0)[['elapsed_time']]
 
