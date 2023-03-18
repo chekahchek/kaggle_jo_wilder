@@ -49,34 +49,41 @@ def get_general_features(df, stage, train=True):
     _train = pd.concat(dfs,axis=1).reset_index()
     
     # 9 - Time per level
-    tmp = (df.groupby(['session_id', 'level'])[['elapsed_time']].max() - df.groupby(['session_id', 'level'])[['elapsed_time']].min())
-    tmp = tmp.reset_index().pivot_table(index='session_id', values='elapsed_time', columns='level').reset_index()
-    col_names = {col: f"lvl_{col}_time" for col in tmp.columns if col != 'session_id'}
-    tmp = tmp.rename(columns=col_names)
-    
     if train == False:
-        if stage == 1 and len(tmp.columns) != 6:
-            for lvl in range(0, 5):
-                lvl_col = f"lvl_{lvl}_time"
-                if lvl_col not in tmp.columns:
-                    tmp[lvl_col] = 0 
-            tmp = tmp[['session_id'] + [f"lvl_{i}_time" for i in range(0,5)]]
-            
-        elif stage == 2 and len(tmp.columns) != 9:
-            for lvl in range(5, 13):
-                lvl_col = f"lvl_{lvl}_time"
-                if lvl_col not in tmp.columns:
-                    tmp[lvl_col] = 0
-            tmp = tmp[['session_id'] + [f"lvl_{i}_time" for i in range(5,13)]]
+        unique_levels = df['level'].unique()
+        
+        if stage == 1 and len(unique_levels) != 5:
+            for lvl in range(0,5):
+                if lvl not in unique_levels:
+                    dummy = df.iloc[-1]
+                    dummy['level'] = lvl
+                    dummy['action_time'] = 0
+                    df = df.append(dummy)
+                    
+        if stage == 2 and len(unique_levels) != 8:
+            for lvl in range(5,13):
+                if lvl not in unique_levels:
+                    dummy = df.iloc[-1]
+                    dummy['level'] = lvl
+                    dummy['action_time'] = 0
+                    df = df.append(dummy)
+                    
+        if stage == 3 and len(unique_levels) != 10:
+            for lvl in range(13,23):
+                if lvl not in unique_levels:
+                    dummy = df.iloc[-1]
+                    dummy['level'] = lvl
+                    dummy['action_time'] = 0
+                    df = df.append(dummy)
+                    
+    tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean']}).reset_index()
+    tmp.columns = tmp.columns.map(''.join)
+    tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean'])
+    tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
+    tmp_pivot = tmp_pivot.reset_index()
 
-        elif stage == 3 and len(tmp.columns) != 11:
-            for lvl in range(13, 23):
-                lvl_col = f"lvl_{lvl}_time"
-                if lvl_col not in tmp.columns:
-                    tmp[lvl_col] = 0
-            tmp = tmp[['session_id'] + [f"lvl_{i}_time" for i in range(13,23)]]
     
-    _train = pd.merge(left=_train, right=tmp, on='session_id', how='left')
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     return _train
 
 
