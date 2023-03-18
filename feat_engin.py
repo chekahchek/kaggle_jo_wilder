@@ -48,42 +48,120 @@ def get_general_features(df, stage, train=True):
 
     _train = pd.concat(dfs,axis=1).reset_index()
     
-    # 9 - Time per level
+    # 9 - Time per level - Sum, Mean, Median(?)
     if train == False:
         unique_levels = df['level'].unique()
+        df_c = df.copy()
         
         if stage == 1 and len(unique_levels) != 5:
             for lvl in range(0,5):
                 if lvl not in unique_levels:
-                    dummy = df.iloc[-1]
+                    dummy = df_c.iloc[-1]
                     dummy['level'] = lvl
                     dummy['action_time'] = 0
-                    df = df.append(dummy)
+                    df_c = df_c.append(dummy)
                     
         if stage == 2 and len(unique_levels) != 8:
             for lvl in range(5,13):
                 if lvl not in unique_levels:
-                    dummy = df.iloc[-1]
+                    dummy = df_c.iloc[-1]
                     dummy['level'] = lvl
                     dummy['action_time'] = 0
-                    df = df.append(dummy)
+                    df_c = df_c.append(dummy)
                     
         if stage == 3 and len(unique_levels) != 10:
             for lvl in range(13,23):
                 if lvl not in unique_levels:
-                    dummy = df.iloc[-1]
+                    dummy = df_c.iloc[-1]
                     dummy['level'] = lvl
                     dummy['action_time'] = 0
-                    df = df.append(dummy)
+                    df_c = df_c.append(dummy)
                     
-    tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean']}).reset_index()
+        tmp = df_c.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean']}).reset_index()
+    else:
+        tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean']}).reset_index()
+        
     tmp.columns = tmp.columns.map(''.join)
     tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean'])
     tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
     tmp_pivot = tmp_pivot.reset_index()
 
-    
     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+    
+    
+    #10 - Time per level and event
+#     COLS = []
+#     EVENT_AT_LEVEL_STG1 = {
+#         'level0_events' : ['navigate_click', 'notification_click', 'object_click', 'person_click'],
+#         'level1_events' : ['cutscene_click', 'navigate_click', 'object_click'],
+#         'level2_events' : ['cutscene_click', 'navigate_click', 'notification_click', 'object_click'],
+#         'level3_events' : ['cutscene_click', 'navigate_click', 'notification_click', 'object_click', 'map_click'],
+#         'level4_events' : ['navigate_click', 'map_click']
+#     }
+
+#     EVENT_AT_LEVEL_STG2 = {
+#         'level5_events' : ['cutscene_click', 'map_click', 'navigate_click'],
+#         'level6_events' : ['cutscene_click', 'navigate_click', 'observation_click', 'person_click'],
+#         'level7_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click', 'person_click'],
+#         'level8_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click', 'person_click'],
+#         'level9_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click', 'person_click'],
+#         'level10_events' : ['navigate_click', 'notification_click', 'object_click', 'person_click'],
+#         'level11_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click'],
+#         'level12_events' : ['map_click', 'navigate_click']
+#     }
+
+#     EVENT_AT_LEVEL_STG3 = {
+#         'level13_events' : ['cutscene_click', 'map_click', 'navigate_click'],
+#         'level14_events' : ['navigate_click'],
+#         'level15_events' : ['person_click'],
+#         'level16_events' : ['cutscene_click', 'navigate_click'],
+#         'level17_events' : ['cutscene_click', 'navigate_click'],
+#         'level18_events' : ['person_click', 'map_click', 'navigate_click', 'notification_click', 'object_click'],
+#         'level19_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click'],
+#         'level20_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click'],
+#         'level21_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click'],
+#         'level22_events' : ['map_click', 'navigate_click']
+#     }
+
+
+#     if stage == 1:
+#         level_range = range(0,5)
+#         EVENT_AT_LEVEL = EVENT_AT_LEVEL_STG1
+#     elif stage == 2:
+#         level_range = range(5,13)
+#         EVENT_AT_LEVEL = EVENT_AT_LEVEL_STG2
+#     else:
+#         level_range = range(13,23)
+#         EVENT_AT_LEVEL = EVENT_AT_LEVEL_STG3
+        
+#     for level, cols in zip(list(level_range), EVENT_AT_LEVEL.values()):
+#         COLS.extend([str(level) + '_' + i for i in cols])
+        
+#     if train == False:
+#         df_c = df.copy()
+#         for lvl in level_range:
+#             existing_cols = df_c.loc[test['level'] == lvl, 'event_name'].unique()
+#             cols_to_add = np.array(EVENT_AT_LEVEL[f'level{lvl}_events'])[~np.isin(EVENT_AT_LEVEL[f'level{lvl}_events'], existing_cols)]
+#             if len(cols_to_add) > 0:
+#                 for add_col in cols_to_add:
+#                     dummy = test.iloc[-1]
+#                     dummy['level'] = lvl
+#                     dummy['action_time'] = 0
+#                     dummy['event_name'] = add_col
+#                     df_c = df_c.append(dummy)
+                    
+#         tmp = df_c.groupby(['session_id', 'level', 'event_name']).agg({'action_time' : ['sum']}).reset_index()
+#     else:
+#         tmp = df.groupby(['session_id', 'level', 'event_name']).agg({'action_time' : ['sum']}).reset_index()
+
+        
+#     tmp.columns = tmp.columns.map(''.join)
+#     tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'event_name'], values=['action_timesum'])
+#     tmp_pivot.columns = [str(i[1]) + '_' + i[2] for i in tmp_pivot.columns]
+#     tmp_pivot = tmp_pivot[COLS]
+#     tmp_pivot = tmp_pivot.reset_index()
+    
+#     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     return _train
 
 
