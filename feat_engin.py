@@ -140,11 +140,11 @@ def get_general_features(df, stage, train=True):
     if train == False:
         df_c = df.copy()
         for lvl in level_range:
-            existing_cols = df_c.loc[test['level'] == lvl, 'event_name'].unique()
+            existing_cols = df_c.loc[df_c['level'] == lvl, 'event_name'].unique()
             cols_to_add = np.array(EVENT_AT_LEVEL[f'level{lvl}_events'])[~np.isin(EVENT_AT_LEVEL[f'level{lvl}_events'], existing_cols)]
             if len(cols_to_add) > 0:
                 for add_col in cols_to_add:
-                    dummy = test.iloc[-1]
+                    dummy = df_c.iloc[-1]
                     dummy['level'] = lvl
                     dummy['action_time'] = 0
                     dummy['event_name'] = add_col
