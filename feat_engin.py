@@ -69,10 +69,10 @@ def get_general_features(df, stage, train=True):
             
         if ADD_COLUMNS:
             NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
-        for _col in NEEDED_COLS[1:]:
-            if _col not in tmp_pivot.columns:
-                tmp_pivot[_col] = 0 
-        tmp_pivot = tmp_pivot[NEEDED_COLS]
+            for _col in NEEDED_COLS[1:]:
+                if _col not in tmp_pivot.columns:
+                    tmp_pivot[_col] = 0
+            tmp_pivot = tmp_pivot[NEEDED_COLS]
         
     
     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
