@@ -80,12 +80,12 @@ def get_general_features(df, stage, train=True):
                     df_c = df_c.append(dummy)
                     df_c = df_c.append(dummy)
                     
-        tmp = df_c.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median']}).reset_index()
+        tmp = df_c.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
     else:
-        tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median']}).reset_index()
+        tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
         
     tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian'])
+    tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
     tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
     tmp_pivot = tmp_pivot.reset_index()
 
