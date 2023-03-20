@@ -48,7 +48,7 @@ def get_general_features(df, stage, train=True):
 
     _train = pd.concat(dfs,axis=1).reset_index()
     
-    # 9 - Time per level - Sum, Mean, Median(?)
+    # 9 - Time per level - Sum, Mean, Median, Std
     if train == False:
         unique_levels = df['level'].unique()
         df_c = df.copy()
@@ -88,7 +88,31 @@ def get_general_features(df, stage, train=True):
     tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
     tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
     tmp_pivot = tmp_pivot.reset_index()
-
+    
+    if stage == 1 and len(tmp_pivot.columns) != 21:
+        level_range = range(0,5)
+        NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
+        for _col in NEEDED_COLS[1:]:
+            if _col not in tmp_pivot.columns:
+                tmp_pivot[_col] = 0 
+        tmp_pivot = tmp_pivot[NEEDED_COLS]
+        
+    elif stage == 2 and len(tmp_pivot.columns) != 33:
+        level_range = range(5,13)
+        NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
+        for _col in NEEDED_COLS[1:]:
+            if _col not in tmp_pivot.columns:
+                tmp_pivot[_col] = 0 
+        tmp_pivot = tmp_pivot[NEEDED_COLS]
+        
+    elif stage == 3 and len(tmp_pivot.columns) != 41:
+        level_range = range(13,23)
+        NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
+        for _col in NEEDED_COLS[1:]:
+            if _col not in tmp_pivot.columns:
+                tmp_pivot[_col] = 0 
+        tmp_pivot = tmp_pivot[NEEDED_COLS]
+    
     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     
@@ -149,7 +173,7 @@ def get_general_features(df, stage, train=True):
 #                 for add_col in cols_to_add:
 #                     dummy = df_c.iloc[-1]
 #                     dummy['level'] = lvl
-#                     dummy['action_time'] = 1e-10
+#                     dummy['action_time'] = 0
 #                     dummy['event_name'] = add_col
 #                     df_c = df_c.append(dummy)
 #                     df_c = df_c.append(dummy)
