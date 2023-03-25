@@ -49,29 +49,29 @@ def get_general_features(df, stage, train=True):
     _train = pd.concat(dfs,axis=1).reset_index()
     
     # 9 - Time per level - Sum, Mean, Median, Std
-    if train == False:
-        unique_levels = df['level'].unique()
-        df_c = df.copy()
+    # if train == False:
+#         unique_levels = df['level'].unique()
+#         df_c = df.copy()
         
-        if stage == 1:
-            level_range = range(0,5)
-        elif stage == 2: 
-            level_range = range(5,13)
-        elif stage == 3:
-            level_range = range(13,23)
+#         if stage == 1:
+#             level_range = range(0,5)
+#         elif stage == 2: 
+#             level_range = range(5,13)
+#         elif stage == 3:
+#             level_range = range(13,23)
             
-        if len(unique_levels) != len(level_range):
-            for lvl in level_range:
-                if lvl not in unique_levels:
-                    dummy = df_c.iloc[-1]
-                    dummy['level'] = lvl
-                    dummy['action_time'] = 1e-10
-                    df_c = df_c.append(dummy)
-                    df_c = df_c.append(dummy)
+#         if len(unique_levels) != len(level_range):
+#             for lvl in level_range:
+#                 if lvl not in unique_levels:
+#                     dummy = df_c.iloc[-1]
+#                     dummy['level'] = lvl
+#                     dummy['action_time'] = 1e-10
+#                     df_c = df_c.append(dummy)
+#                     df_c = df_c.append(dummy)
                              
-        tmp = df_c.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
-    else:
-        tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
+#         tmp = df_c.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
+#     else:
+    tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
         
     tmp.columns = tmp.columns.map(''.join)
     tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
