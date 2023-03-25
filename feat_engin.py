@@ -53,12 +53,12 @@ def get_general_features(df, stage, train=True):
 #         unique_levels = df['level'].unique()
 #         df_c = df.copy()
         
-#         if stage == 1:
-#             level_range = range(0,5)
-#         elif stage == 2: 
-#             level_range = range(5,13)
-#         elif stage == 3:
-#             level_range = range(13,23)
+        # if stage == 1:
+        #     level_range = range(0,5)
+        # elif stage == 2: 
+        #     level_range = range(5,13)
+        # elif stage == 3:
+        #     level_range = range(13,23)
             
 #         if len(unique_levels) != len(level_range):
 #             for lvl in level_range:
@@ -82,10 +82,13 @@ def get_general_features(df, stage, train=True):
         ADD_COLUMNS = False
         if stage == 1 and len(tmp_pivot.columns) != 21:
             ADD_COLUMNS = True
+            level_range = range(0,5)
         elif stage == 2 and len(tmp_pivot.columns) != 33:
             ADD_COLUMNS = True
+            level_range = range(5,13)
         elif stage == 3 and len(tmp_pivot.columns) != 41:
             ADD_COLUMNS = True
+            level_range = range(13,23)
             
         if ADD_COLUMNS:
             NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
