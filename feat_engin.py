@@ -43,7 +43,15 @@ def get_general_features(df, stage, train=True):
     EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
     for event_name in EVENT_NAMES:
         tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].sum()
-        tmp.name = event_name + '_time'
+        tmp.name = event_name + '_time_sum'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].mean()
+        tmp.name = event_name + '_time_mean'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].std()
+        tmp.name = event_name + '_time_std'
         dfs.append(tmp)
 
     _train = pd.concat(dfs,axis=1).reset_index()
