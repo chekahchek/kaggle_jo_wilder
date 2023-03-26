@@ -112,9 +112,9 @@ def get_general_features(df, stage, train=True):
     }
 
 
-    tmp = df.groupby(['session_id', 'level', 'event_name']).agg({'action_time' : ['sum']}).reset_index()
+    tmp = df.groupby(['session_id', 'level', 'event_name']).agg({'action_time' : ['sum', 'mean']}).reset_index()
     tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'event_name'], values=['action_timesum'])
+    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'event_name'], values=['action_timesum', 'action_timemean'])
     tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
     
     if stage == 1:
@@ -129,15 +129,15 @@ def get_general_features(df, stage, train=True):
         
     for level, cols in zip(list(level_range), EVENT_AT_LEVEL.values()):
         COLS.extend([str(level) + '_' + i + '_' + 'action_timesum' for i in cols])
-    
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timemean' for i in cols])
     
     if train == False:
         ADD_COLUMNS = False
-        if stage == 1 and len(tmp_pivot.columns) != 19:
+        if stage == 1 and len(tmp_pivot.columns) != 37:
             ADD_COLUMNS = True
-        elif stage == 2 and len(tmp_pivot.columns) != 33:
+        elif stage == 2 and len(tmp_pivot.columns) != 65:
             ADD_COLUMNS = True
-        elif stage == 3 and len(tmp_pivot.columns) != 29:
+        elif stage == 3 and len(tmp_pivot.columns) != 57:
             ADD_COLUMNS = True
             
         if ADD_COLUMNS:
