@@ -76,7 +76,7 @@ def get_general_features(df, stage, train=True):
 #         tmp.name = room_fqid + 'time_std'
 #         dfs.append(tmp)
     
-#     _train = pd.concat(dfs,axis=1).reset_index()
+    _train = pd.concat(dfs,axis=1).reset_index()
     
     
     # 10 - Time per level - Sum, Mean, Median, Std
