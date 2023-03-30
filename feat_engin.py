@@ -56,27 +56,27 @@ def get_general_features(df, stage, train=True):
 
     
     # 9 - Time per room_fqid
-    if stage == 1:
-        room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
-    elif stage == 2:
-        room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks', 'tunic.capitol_0.hall']
-    elif stage == 3:
-        room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
+#     if stage == 1:
+#         room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
+#     elif stage == 2:
+#         room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks', 'tunic.capitol_0.hall']
+#     elif stage == 3:
+#         room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
     
-    for room_fqid in room_fqid_list:
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].sum()
-        tmp.name = room_fqid + 'time_sum'
-        dfs.append(tmp)
+#     for room_fqid in room_fqid_list:
+#         tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].sum()
+#         tmp.name = room_fqid + 'time_sum'
+#         dfs.append(tmp)
 
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].mean()
-        tmp.name = room_fqid + 'time_mean'
-        dfs.append(tmp)
+#         tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].mean()
+#         tmp.name = room_fqid + 'time_mean'
+#         dfs.append(tmp)
 
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].std()
-        tmp.name = room_fqid + 'time_std'
-        dfs.append(tmp)
+#         tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].std()
+#         tmp.name = room_fqid + 'time_std'
+#         dfs.append(tmp)
     
-    _train = pd.concat(dfs,axis=1).reset_index()
+#     _train = pd.concat(dfs,axis=1).reset_index()
     
     
     # 10 - Time per level - Sum, Mean, Median, Std
