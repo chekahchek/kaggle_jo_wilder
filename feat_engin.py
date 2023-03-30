@@ -80,32 +80,32 @@ def get_general_features(df, stage, train=True):
     
     
     # 10 - Time per level - Sum, Mean, Median, Std
-    tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
-    tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
-    tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
-    tmp_pivot = tmp_pivot.reset_index()
+#     tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
+#     tmp.columns = tmp.columns.map(''.join)
+#     tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
+#     tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
+#     tmp_pivot = tmp_pivot.reset_index()
     
-    if train == False:
-        ADD_COLUMNS = False
-        if stage == 1 and len(tmp_pivot.columns) != 21:
-            ADD_COLUMNS = True
-            level_range = range(0,5)
-        elif stage == 2 and len(tmp_pivot.columns) != 33:
-            ADD_COLUMNS = True
-            level_range = range(5,13)
-        elif stage == 3 and len(tmp_pivot.columns) != 41:
-            ADD_COLUMNS = True
-            level_range = range(13,23)
+#     if train == False:
+#         ADD_COLUMNS = False
+#         if stage == 1 and len(tmp_pivot.columns) != 21:
+#             ADD_COLUMNS = True
+#             level_range = range(0,5)
+#         elif stage == 2 and len(tmp_pivot.columns) != 33:
+#             ADD_COLUMNS = True
+#             level_range = range(5,13)
+#         elif stage == 3 and len(tmp_pivot.columns) != 41:
+#             ADD_COLUMNS = True
+#             level_range = range(13,23)
             
-        if ADD_COLUMNS:
-            NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
-            missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
-            for _col in missing_cols:
-                tmp_pivot[_col] = 0
-            tmp_pivot = tmp_pivot[NEEDED_COLS]
+#         if ADD_COLUMNS:
+#             NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
+#             missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
+#             for _col in missing_cols:
+#                 tmp_pivot[_col] = 0
+#             tmp_pivot = tmp_pivot[NEEDED_COLS]
         
-    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+#     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     
     #11 - Time per level and event
