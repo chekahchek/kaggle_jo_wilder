@@ -56,56 +56,56 @@ def get_general_features(df, stage, train=True):
 
     
     # 9 - Time per room_fqid
-#     if stage == 1:
-#         room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
-#     elif stage == 2:
-#         room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks', 'tunic.capitol_0.hall']
-#     elif stage == 3:
-#         room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
+    if stage == 1:
+        room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
+    elif stage == 2:
+        room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks', 'tunic.capitol_0.hall']
+    elif stage == 3:
+        room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
     
-#     for room_fqid in room_fqid_list:
-#         tmp = data.loc[data['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].sum()
-#         tmp.name = room_fqid + 'time_sum'
-#         dfs.append(tmp)
+    for room_fqid in room_fqid_list:
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].sum()
+        tmp.name = room_fqid + 'time_sum'
+        dfs.append(tmp)
 
-#         tmp = data.loc[data['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].mean()
-#         tmp.name = room_fqid + 'time_mean'
-#         dfs.append(tmp)
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].mean()
+        tmp.name = room_fqid + 'time_mean'
+        dfs.append(tmp)
 
-#         tmp = data.loc[data['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].std()
-#         tmp.name = room_fqid + 'time_std'
-#         dfs.append(tmp)
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].std()
+        tmp.name = room_fqid + 'time_std'
+        dfs.append(tmp)
     
-#     _train = pd.concat(dfs,axis=1).reset_index()
+    _train = pd.concat(dfs,axis=1).reset_index()
     
     
-#     # 10 - Time per level - Sum, Mean, Median, Std
-#     tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
-#     tmp.columns = tmp.columns.map(''.join)
-#     tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
-#     tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
-#     tmp_pivot = tmp_pivot.reset_index()
+    # 10 - Time per level - Sum, Mean, Median, Std
+    tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
+    tmp.columns = tmp.columns.map(''.join)
+    tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
+    tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
+    tmp_pivot = tmp_pivot.reset_index()
     
-#     if train == False:
-#         ADD_COLUMNS = False
-#         if stage == 1 and len(tmp_pivot.columns) != 21:
-#             ADD_COLUMNS = True
-#             level_range = range(0,5)
-#         elif stage == 2 and len(tmp_pivot.columns) != 33:
-#             ADD_COLUMNS = True
-#             level_range = range(5,13)
-#         elif stage == 3 and len(tmp_pivot.columns) != 41:
-#             ADD_COLUMNS = True
-#             level_range = range(13,23)
+    if train == False:
+        ADD_COLUMNS = False
+        if stage == 1 and len(tmp_pivot.columns) != 21:
+            ADD_COLUMNS = True
+            level_range = range(0,5)
+        elif stage == 2 and len(tmp_pivot.columns) != 33:
+            ADD_COLUMNS = True
+            level_range = range(5,13)
+        elif stage == 3 and len(tmp_pivot.columns) != 41:
+            ADD_COLUMNS = True
+            level_range = range(13,23)
             
-#         if ADD_COLUMNS:
-#             NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
-#             missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
-#             for _col in missing_cols:
-#                 tmp_pivot[_col] = 0
-#             tmp_pivot = tmp_pivot[NEEDED_COLS]
+        if ADD_COLUMNS:
+            NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
+            missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
+            for _col in missing_cols:
+                tmp_pivot[_col] = 0
+            tmp_pivot = tmp_pivot[NEEDED_COLS]
         
-#     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     
     #11 - Time per level and event
