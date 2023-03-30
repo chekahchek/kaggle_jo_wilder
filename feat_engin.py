@@ -9,20 +9,20 @@ def get_general_features(df, stage, train=True):
     tmp.name = 'unique_text'
     dfs.append(tmp)
 
-#     # 2 - Total elapsed time
-#     tmp = df.groupby('session_id')['elapsed_time'].max()
-#     tmp.name = 'total_elapsed_time'
-#     dfs.append(tmp)
+    # 2 - Total elapsed time
+    tmp = df.groupby('session_id')['elapsed_time'].max()
+    tmp.name = 'total_elapsed_time'
+    dfs.append(tmp)
     
-#     # 3 - Mean elapsed time 
-#     tmp = df.groupby('session_id')['elapsed_time'].mean()
-#     tmp.name = 'mean_elapsed_time'
-#     dfs.append(tmp)
+    # 3 - Mean elapsed time 
+    tmp = df.groupby('session_id')['elapsed_time'].mean()
+    tmp.name = 'mean_elapsed_time'
+    dfs.append(tmp)
     
-#     # 4 - Std Dev elapsed time 
-#     tmp = df.groupby('session_id')['elapsed_time'].std()
-#     tmp.name = 'stddev_elapsed_time'
-#     dfs.append(tmp)
+    # 4 - Std Dev elapsed time 
+    tmp = df.groupby('session_id')['elapsed_time'].std()
+    tmp.name = 'stddev_elapsed_time'
+    dfs.append(tmp)
     
     # 5 - Average Time per action
     tmp = df.groupby('session_id')['elapsed_time'].max() / df.groupby('session_id').size()
@@ -40,8 +40,7 @@ def get_general_features(df, stage, train=True):
     dfs.append(tmp)
 
     # 8 - Time spent for each event_name
-    # EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
-    EVENT_NAMES = ['navigate_click', 'person_click','cutscene_click','object_click', 'map_hover','observation_click']
+    EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
     for event_name in EVENT_NAMES:
         tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].sum()
         tmp.name = event_name + '_time_sum'
@@ -55,69 +54,92 @@ def get_general_features(df, stage, train=True):
         tmp.name = event_name + '_time_std'
         dfs.append(tmp)
 
+    
+    # 9 - Time per room_fqid
+    if stage == 1:
+        room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
+    elif stage == 2:
+        room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks', 'tunic.capitol_0.hall']
+    elif stage == 3:
+        room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
+    
+    for room_fqid in room_fqid_list:
+        tmp = data.loc[data['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].sum()
+        tmp.name = room_fqid + 'time_sum'
+        dfs.append(tmp)
+
+        tmp = data.loc[data['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].mean()
+        tmp.name = room_fqid + 'time_mean'
+        dfs.append(tmp)
+
+        tmp = data.loc[data['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].std()
+        tmp.name = room_fqid + 'time_std'
+        dfs.append(tmp)
+    
     _train = pd.concat(dfs,axis=1).reset_index()
     
-    # 9 - Time per level - Sum, Mean, Median, Std
-#     tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
-#     tmp.columns = tmp.columns.map(''.join)
-#     tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
-#     tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
-#     tmp_pivot = tmp_pivot.reset_index()
     
-#     if train == False:
-#         ADD_COLUMNS = False
-#         if stage == 1 and len(tmp_pivot.columns) != 21:
-#             ADD_COLUMNS = True
-#             level_range = range(0,5)
-#         elif stage == 2 and len(tmp_pivot.columns) != 33:
-#             ADD_COLUMNS = True
-#             level_range = range(5,13)
-#         elif stage == 3 and len(tmp_pivot.columns) != 41:
-#             ADD_COLUMNS = True
-#             level_range = range(13,23)
+    # 10 - Time per level - Sum, Mean, Median, Std
+    tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
+    tmp.columns = tmp.columns.map(''.join)
+    tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
+    tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
+    tmp_pivot = tmp_pivot.reset_index()
+    
+    if train == False:
+        ADD_COLUMNS = False
+        if stage == 1 and len(tmp_pivot.columns) != 21:
+            ADD_COLUMNS = True
+            level_range = range(0,5)
+        elif stage == 2 and len(tmp_pivot.columns) != 33:
+            ADD_COLUMNS = True
+            level_range = range(5,13)
+        elif stage == 3 and len(tmp_pivot.columns) != 41:
+            ADD_COLUMNS = True
+            level_range = range(13,23)
             
-#         if ADD_COLUMNS:
-#             NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
-#             missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
-#             for _col in missing_cols:
-#                 tmp_pivot[_col] = 0
-#             tmp_pivot = tmp_pivot[NEEDED_COLS]
+        if ADD_COLUMNS:
+            NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
+            missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
+            for _col in missing_cols:
+                tmp_pivot[_col] = 0
+            tmp_pivot = tmp_pivot[NEEDED_COLS]
         
-#     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     
-    #10 - Time per level and event
+    #11 - Time per level and event
     COLS = []
     EVENT_AT_LEVEL_STG1 = {
-        'level0_events' : ['navigate_click', 'notification_click', 'object_click'],
-        'level1_events' : ['cutscene_click', 'object_click'],
-        'level2_events' : ['cutscene_click', 'navigate_click', 'object_click'],
-        'level3_events' : ['notification_click'],
+        'level0_events' : ['navigate_click', 'notification_click', 'object_click', 'person_click'],
+        'level1_events' : ['cutscene_click', 'navigate_click', 'object_click'],
+        'level2_events' : ['cutscene_click', 'navigate_click', 'notification_click', 'object_click'],
+        'level3_events' : ['cutscene_click', 'navigate_click', 'notification_click', 'object_click', 'map_click'],
         'level4_events' : ['navigate_click', 'map_click']
     }
 
     EVENT_AT_LEVEL_STG2 = {
-        'level5_events' : ['map_click'],
-        'level6_events' : ['cutscene_click', 'navigate_click', 'observation_click'],
-        'level7_events' : ['navigate_click', 'object_click', 'person_click'],
-        'level8_events' : ['object_click', 'person_click'],
-        'level9_events' : ['navigate_click', 'object_click'],
-        'level10_events' : ['navigate_click', 'object_click', 'person_click'],
+        'level5_events' : ['cutscene_click', 'map_click', 'navigate_click'],
+        'level6_events' : ['cutscene_click', 'navigate_click', 'observation_click', 'person_click'],
+        'level7_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click', 'person_click'],
+        'level8_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click', 'person_click'],
+        'level9_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click', 'person_click'],
+        'level10_events' : ['navigate_click', 'notification_click', 'object_click', 'person_click'],
         'level11_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click'],
-        'level12_events' : ['navigate_click']
+        'level12_events' : ['map_click', 'navigate_click']
     }
 
     EVENT_AT_LEVEL_STG3 = {
-        'level13_events' : ['navigate_click'],
+        'level13_events' : ['cutscene_click', 'map_click', 'navigate_click'],
         'level14_events' : ['navigate_click'],
         'level15_events' : ['person_click'],
-        'level16_events' : ['cutscene_click'],
+        'level16_events' : ['cutscene_click', 'navigate_click'],
         'level17_events' : ['cutscene_click', 'navigate_click'],
-        'level18_events' : ['navigate_click', 'notification_click', 'object_click'],
-        'level19_events' : ['navigate_click', 'notification_click', 'object_click'],
+        'level18_events' : ['person_click', 'map_click', 'navigate_click', 'notification_click', 'object_click'],
+        'level19_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click'],
         'level20_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click'],
         'level21_events' : ['map_click', 'navigate_click', 'notification_click', 'object_click'],
-        'level22_events' : ['navigate_click']
+        'level22_events' : ['map_click', 'navigate_click']
     }
 
 
@@ -409,5 +431,3 @@ def game_version(data):
         label = 0
         
     return pd.DataFrame({'version': label}, index=[0])
-
-    
