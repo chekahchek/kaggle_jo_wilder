@@ -286,23 +286,20 @@ def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, 
         df.loc[df['start_index'] == False, 'start_index'] = np.NaN
         df.loc[df['end_index'] == False, 'end_index'] = np.NaN
         df['keep'] = df.groupby('session_id').apply(lambda x: (x['index'] >= x['start_index'].min()) & (x['index'] <= x['end_index'].max())).values
-        df = df.loc[df['keep'], ['session_id', 'elapsed_time', 'event_name', 'room_fqid']]
-        
-        
-        if rm_count:
-            out = df.groupby('session_id').agg(event_counts=('event_name', 'count'), room_unique_count=('room_fqid', 'nunique'))
-            out = out.rename(columns={'event_counts' : f'event_counts_{str(num_id)}', 
-                                      'room_unique_count' : f'room_unique_count_{str(num_id)}'
-                                     })
-        else:
-            out = df.groupby('session_id').agg(event_counts=('event_name', 'count'))
-            out = out.rename(columns={'event_counts' : f'event_counts_{str(num_id)}'})
-        
-        out[f'time_taken_{str(num_id)}'] = df.groupby('session_id').nth(-1)['elapsed_time'] - df.groupby('session_id').nth(0)['elapsed_time']
-    
-        print(f"Num of sess_id at the end for {num_id}: {len(out)}")
+        df = df.loc[df['keep'], ['session_id', 'action_time', 'event_name', 'room_fqid']]
 
-        return out.reset_index()
+        action_time_name = f'event_{str(num_id)}_time_'
+        event_count_name = f'event_{str(num_id)}_'
+
+        if rm_count:
+            room_count_name = f'room_{str(num_id)}_'
+            out = df.rename(columns={'action_time' : action_time_name, 'event_name' : event_count_name, 'room_fqid' : room_count_name})
+            out = out.groupby('session_id').agg({event_count_name : 'count', room_count_name: 'nunique', action_time_name: ['sum', 'mean', 'std']}).reset_index()
+        else:
+            out = df.rename(columns={'action_time' : action_time_name, 'event_name' : event_count_name})
+            out = out.groupby('session_id').agg({event_count_name : 'count', action_time_name: ['sum', 'mean', 'std']}).reset_index()
+
+        out.columns = out.columns.map(''.join)
     
     # For inference
     else:
@@ -359,22 +356,31 @@ def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, 
 
 
         df = df.iloc[s_index:e_index].reset_index(drop=True)
-        time_taken = df['elapsed_time'].iloc[-1] - df['elapsed_time'].iloc[0]
+        time_taken_sum = df['action_time'].sum()
+        time_taken_mean = df['action_time'].mean()
+        time_taken_std = df['action_time'].std()
+        if np.isnan(time_taken_std):
+            time_taken_std = 0
+        
         event_count = df['event_name'].count()
         
         if rm_count:
             room_uniq_count = df['room_fqid'].nunique()
-            out = pd.DataFrame({f'event_counts_{str(num_id)}' : event_count,
-                                f'room_unique_count_{str(num_id)}' : room_uniq_count,
-                                f'time_taken_{str(num_id)}' : time_taken}, 
+            out = pd.DataFrame({f'event_{str(num_id)}_count' : event_count,
+                                f'room_{str(num_id)}_nunique' : room_uniq_count,
+                                f'event_{str(num_id)}_sum' : time_taken_sum, 
+                                f'event_{str(num_id)}_mean' : time_taken_mean,
+                                f'event_{str(num_id)}_std' : time_taken_std}, 
                                 index=[0])
                              
         else:
-            out = pd.DataFrame({f'event_counts_{str(num_id)}' : event_count,
-                                f'time_taken_{str(num_id)}' : time_taken}, 
+            out = pd.DataFrame({f'event_{str(num_id)}_count' : event_count,
+                                f'event_{str(num_id)}_sum' : time_taken_sum, 
+                                f'event_{str(num_id)}_mean' : time_taken_mean,
+                                f'event_{str(num_id)}_std' : time_taken_std}, 
                                 index=[0])
             
-        return out
+    return out
     
 
 def arrow_click(df, substring, name, train=True):
