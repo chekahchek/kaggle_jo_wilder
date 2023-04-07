@@ -30,27 +30,27 @@ def get_general_features(df, stage, train=True):
     dfs.append(tmp)
     
     # 6 - Hover duration
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['object_hover'].sum()
+    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].sum()
     tmp.name = 'object_hover_sum'
     dfs.append(tmp)
     
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['object_hover'].mean()
+    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].mean()
     tmp.name = 'object_hover_mean'
     dfs.append(tmp)
     
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['object_hover'].std()
+    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].std()
     tmp.name = 'object_hover_std'
     dfs.append(tmp)
     
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['object_hover'].sum()
+    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].sum()
     tmp.name = 'map_hover_sum'
     dfs.append(tmp)
     
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['object_hover'].mean()
+    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].mean()
     tmp.name = 'map_hover_mean'
     dfs.append(tmp)
     
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['object_hover'].std()
+    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].std()
     tmp.name = 'map_hover_std'
     dfs.append(tmp)
   
