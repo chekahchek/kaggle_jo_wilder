@@ -29,10 +29,31 @@ def get_general_features(df, stage, train=True):
     tmp.name = 'time_per_action'
     dfs.append(tmp)
     
-    # 6 - Total hover duration
-    tmp = df.groupby('session_id')['hover_duration'].sum()
-    tmp.name = 'total_hover_duration'
+    # 6 - Hover duration
+    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['object_hover'].sum()
+    tmp.name = 'object_hover_sum'
     dfs.append(tmp)
+    
+    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['object_hover'].mean()
+    tmp.name = 'object_hover_mean'
+    dfs.append(tmp)
+    
+    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['object_hover'].std()
+    tmp.name = 'object_hover_std'
+    dfs.append(tmp)
+    
+    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['object_hover'].sum()
+    tmp.name = 'map_hover_sum'
+    dfs.append(tmp)
+    
+    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['object_hover'].mean()
+    tmp.name = 'map_hover_mean'
+    dfs.append(tmp)
+    
+    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['object_hover'].std()
+    tmp.name = 'map_hover_std'
+    dfs.append(tmp)
+  
 
     # 7 - Number of times notebook open
     tmp = df.loc[df['event_name']  == 'notebook_click', :].groupby('session_id')['event_name'].count()
@@ -56,56 +77,56 @@ def get_general_features(df, stage, train=True):
 
     
     # 9 - Time per room_fqid
-#     if stage == 1:
-#         room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
-#     elif stage == 2:
-#         room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks', 'tunic.capitol_0.hall']
-#     elif stage == 3:
-#         room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
+    if stage == 1:
+        room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
+    elif stage == 2:
+        room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks', 'tunic.capitol_0.hall']
+    elif stage == 3:
+        room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
     
-#     for room_fqid in room_fqid_list:
-#         tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].sum()
-#         tmp.name = room_fqid + 'time_sum'
-#         dfs.append(tmp)
+    for room_fqid in room_fqid_list:
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].sum()
+        tmp.name = room_fqid + 'time_sum'
+        dfs.append(tmp)
 
-#         tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].mean()
-#         tmp.name = room_fqid + 'time_mean'
-#         dfs.append(tmp)
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].mean()
+        tmp.name = room_fqid + 'time_mean'
+        dfs.append(tmp)
 
-#         tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].std()
-#         tmp.name = room_fqid + 'time_std'
-#         dfs.append(tmp)
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].std()
+        tmp.name = room_fqid + 'time_std'
+        dfs.append(tmp)
     
     _train = pd.concat(dfs,axis=1).reset_index()
     
     
     # 10 - Time per level - Sum, Mean, Median, Std
-#     tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
-#     tmp.columns = tmp.columns.map(''.join)
-#     tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
-#     tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
-#     tmp_pivot = tmp_pivot.reset_index()
+    tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
+    tmp.columns = tmp.columns.map(''.join)
+    tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
+    tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
+    tmp_pivot = tmp_pivot.reset_index()
     
-#     if train == False:
-#         ADD_COLUMNS = False
-#         if stage == 1 and len(tmp_pivot.columns) != 21:
-#             ADD_COLUMNS = True
-#             level_range = range(0,5)
-#         elif stage == 2 and len(tmp_pivot.columns) != 33:
-#             ADD_COLUMNS = True
-#             level_range = range(5,13)
-#         elif stage == 3 and len(tmp_pivot.columns) != 41:
-#             ADD_COLUMNS = True
-#             level_range = range(13,23)
+    if train == False:
+        ADD_COLUMNS = False
+        if stage == 1 and len(tmp_pivot.columns) != 21:
+            ADD_COLUMNS = True
+            level_range = range(0,5)
+        elif stage == 2 and len(tmp_pivot.columns) != 33:
+            ADD_COLUMNS = True
+            level_range = range(5,13)
+        elif stage == 3 and len(tmp_pivot.columns) != 41:
+            ADD_COLUMNS = True
+            level_range = range(13,23)
             
-#         if ADD_COLUMNS:
-#             NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
-#             missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
-#             for _col in missing_cols:
-#                 tmp_pivot[_col] = 0
-#             tmp_pivot = tmp_pivot[NEEDED_COLS]
+        if ADD_COLUMNS:
+            NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
+            missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
+            for _col in missing_cols:
+                tmp_pivot[_col] = 0
+            tmp_pivot = tmp_pivot[NEEDED_COLS]
         
-#     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     
     #11 - Time per level and event
@@ -356,7 +377,7 @@ def get_event_details(df, s_level, e_level, s_text_fqid=None, e_text_fqid=None, 
         return out
     
 
-def arrow_click(df, substring, name):
+def arrow_click(df, substring, name, train=True):
     """
     For events where user has to click through multiple pages before selecting the correct one. 
     cri = Filtering for situation where the user is navigating through all the different pages. Doesm't incldue the navigate click to take them into the scren,
@@ -378,12 +399,18 @@ def arrow_click(df, substring, name):
     df[name] = cri.astype(int)
     tmp = df.groupby('session_id')[[name]].sum()
     
-    tmp2 = df.loc[cri_time, :].groupby('session_id')[['elapsed_time']].max() - df.loc[cri_time, :].groupby('session_id')[['elapsed_time']].min()
-    out = pd.merge(tmp, tmp2, left_index=True, right_index=True, how='left').reset_index().rename(columns={'elapsed_time' : f'{name}_elapsed_time'})
+    _name = name + '_' + 'time'
+    tmp2 = df.loc[cri_time, :].rename(columns={'action_time' : _name}).groupby('session_id').agg({_name : ['sum', 'mean', 'std']}).reset_index()
+    tmp2.columns = tmp2.columns.map(''.join)
+    out = pd.merge(tmp, tmp2, left_on='session_id', right_on='session_id', how='left')
+
+    if train == False and len(out.columns) != 5:
+        std_dev_col = _name + 'std'
+        out[std_dev_col] = 0 
     return out
 
 
-def point_click(df, fqid, fqid_bingo, name):
+def point_click(df, fqid, fqid_bingo, name, train=True):
     """
     For events where user has to click on the correct option in the entire page. 
     cri = Filtering for situation where the user is clicking on the correct option. Doesn't include the navigate click to take them into the screen,
@@ -397,12 +424,18 @@ def point_click(df, fqid, fqid_bingo, name):
     """
     cri = (df['fqid'] == fqid) & (df['event_name'] != 'navigate_click') & (df['name'] != 'close')
     cri_time = ((df['fqid'] == fqid) | (df['fqid'] == fqid_bingo)) & (df['name'] != 'close')
-    
+
     df[name] = (cri).astype(int)
-    tmp = df.groupby('session_id')[[name]].sum()
-    
-    tmp2 = df.loc[cri_time, :].groupby('session_id')[['elapsed_time']].max() - df.loc[cri_time, :].groupby('session_id')[['elapsed_time']].min()
-    out = pd.merge(tmp, tmp2, left_index=True, right_index=True, how='left').reset_index().rename(columns={'elapsed_time' : f'{name}_elapsed_time'})
+    tmp = df.groupby('session_id')[[name]].sum().reset_index()
+
+    _name = name + '_' + 'time'
+    tmp2 = df.loc[cri_time, :].rename(columns={'action_time' : _name}).groupby('session_id').agg({_name : ['sum', 'mean', 'std']}).reset_index()
+    tmp2.columns = tmp2.columns.map(''.join)
+    out = pd.merge(tmp, tmp2, left_on='session_id', right_on='session_id', how='left')
+
+    if train == False and len(out.columns) != 5:
+        std_dev_col = _name + 'std'
+        out[std_dev_col] = 0 
     
     return out
 
