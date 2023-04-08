@@ -164,11 +164,11 @@ def get_general_features(df, stage, train=True):
     }
 
 
-    tmp = df.groupby(['session_id', 'level', 'event_name']).agg({'action_time' : ['sum', 'mean']}).reset_index()
+    tmp = df.groupby(['session_id', 'level', 'event_name']).agg({'action_time' : ['sum', 'mean', 'std']}).reset_index()
     tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'event_name'], values=['action_timesum', 'action_timemean'])
+    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'event_name'], values=['action_timesum', 'action_timemean', 'action_timestd'])
     tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
-    
+
     if stage == 1:
         level_range = range(0,5)
         EVENT_AT_LEVEL = EVENT_AT_LEVEL_STG1
@@ -178,26 +178,35 @@ def get_general_features(df, stage, train=True):
     else:
         level_range = range(13,23)
         EVENT_AT_LEVEL = EVENT_AT_LEVEL_STG3
-        
+
     for level, cols in zip(list(level_range), EVENT_AT_LEVEL.values()):
         COLS.extend([str(level) + '_' + i + '_' + 'action_timesum' for i in cols])
         COLS.extend([str(level) + '_' + i + '_' + 'action_timemean' for i in cols])
-    
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timestd' for i in cols])
+
+    cols_drop_no_std = ['0_notification_click_action_timestd', '3_map_click_action_timestd', '4_map_click_action_timestd', '5_map_click_action_timestd', '6_observation_click_action_timestd', \
+                        '7_map_click_action_timestd', '7_notification_click_action_timestd', '8_map_click_action_timestd', '9_map_click_action_timestd', '10_notification_click_action_timestd',\
+                        '10_object_click_action_timestd', '11_map_click_action_timestd', '12_map_click_action_timestd', '13_map_click_action_timestd', '18_map_click_action_timestd', \
+                        '18_notification_click_action_timestd', '19_map_click_action_timestd', '19_notification_click_action_timestd', '20_notification_click_action_timestd', \
+                        '20_map_click_action_timestd', '21_map_click_action_timestd', '22_map_click_action_timestd']
+
+    COLS = np.array(COLS)[~np.isin(COLS, cols_drop_no_std)]
+
     if train == False:
         ADD_COLUMNS = False
-        if stage == 1 and len(tmp_pivot.columns) != 37:
+        if stage == 1 and len(tmp_pivot.columns) != 52:
             ADD_COLUMNS = True
-        elif stage == 2 and len(tmp_pivot.columns) != 65:
+        elif stage == 2 and len(tmp_pivot.columns) != 87:
             ADD_COLUMNS = True
-        elif stage == 3 and len(tmp_pivot.columns) != 57:
+        elif stage == 3 and len(tmp_pivot.columns) != 76:
             ADD_COLUMNS = True
-            
+
         if ADD_COLUMNS:
             missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
             for _col in missing_cols:
                 tmp_pivot[_col] = 0
-            
-    
+
+
     tmp_pivot = tmp_pivot[COLS]
     tmp_pivot = tmp_pivot.reset_index()
     
