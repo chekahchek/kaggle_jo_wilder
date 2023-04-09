@@ -211,6 +211,94 @@ def get_general_features(df, stage, train=True):
     tmp_pivot = tmp_pivot.reset_index()
     
     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+    
+    
+    #12 - Time per level and room
+    COLS = []
+    ROOM_AT_LEVEL_STG1 = {
+            'level0_rooms' : ['tunic.historicalsociety.closet'],
+            'level1_rooms' : ['tunic.historicalsociety.basement', 'tunic.historicalsociety.closet', 'tunic.historicalsociety.entry'],
+            'level2_rooms' : ['tunic.historicalsociety.collection', 'tunic.historicalsociety.entry'],
+            'level3_rooms' : ['tunic.historicalsociety.collection', 'tunic.historicalsociety.entry', 'tunic.kohlcenter.halloffame'],
+            'level4_rooms' : ['tunic.capitol_0.hall', 'tunic.kohlcenter.halloffame']
+        }
+
+    ROOM_AT_LEVEL_STG2 = {
+            'level5_rooms' : ['tunic.capitol_0.hall', 'tunic.historicalsociety.basement', 'tunic.historicalsociety.closet_dirty', 'tunic.historicalsociety.entry'],
+            'level6_rooms' : ['tunic.historicalsociety.basement', 'tunic.historicalsociety.closet_dirty','tunic.historicalsociety.entry', 'tunic.historicalsociety.frontdesk',\
+                              'tunic.historicalsociety.stacks'],
+            'level7_rooms' : ['tunic.historicalsociety.entry', 'tunic.historicalsociety.frontdesk', 'tunic.historicalsociety.stacks', 'tunic.humanecology.frontdesk'],
+            'level8_rooms' : ['tunic.drycleaner.frontdesk', 'tunic.humanecology.frontdesk'],
+            'level9_rooms' : ['tunic.drycleaner.frontdesk', 'tunic.library.frontdesk', 'tunic.library.microfiche'],
+            'level10_rooms' : ['tunic.library.frontdesk', 'tunic.library.microfiche'],
+            'level11_rooms' : ['tunic.historicalsociety.entry', 'tunic.historicalsociety.frontdesk', 'tunic.historicalsociety.stacks', 'tunic.library.frontdesk'],
+            'level12_rooms' : ['tunic.capitol_1.hall', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
+        }
+
+    ROOM_AT_LEVEL_STG3 = {
+            'level13_rooms' : ['tunic.capitol_1.hall', 'tunic.historicalsociety.basement', 'tunic.historicalsociety.entry'],
+            'level14_rooms' : ['tunic.historicalsociety.basement', 'tunic.historicalsociety.cage'],
+            'level15_rooms' : ['tunic.historicalsociety.basement', 'tunic.historicalsociety.cage', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.frontdesk','tunic.historicalsociety.stacks'],
+            'level16_rooms' : ['tunic.historicalsociety.basement', 'tunic.historicalsociety.cage', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.frontdesk', 'tunic.historicalsociety.stacks'],
+            'level17_rooms' : ['tunic.historicalsociety.basement', 'tunic.historicalsociety.cage', 'tunic.historicalsociety.collection_flag', 'tunic.historicalsociety.entry'],
+            'level18_rooms' : ['tunic.historicalsociety.collection_flag', 'tunic.historicalsociety.entry', 'tunic.wildlife.center'],
+            'level19_rooms' : ['tunic.flaghouse.entry', 'tunic.wildlife.center'],
+            'level20_rooms' : ['tunic.flaghouse.entry', 'tunic.library.frontdesk', 'tunic.library.microfiche'],
+            'level21_rooms' : ['tunic.historicalsociety.entry', 'tunic.historicalsociety.frontdesk', 'tunic.historicalsociety.stacks', 'tunic.library.frontdesk', 'tunic.library.microfiche'],
+            'level22_rooms' : ['tunic.capitol_2.hall', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
+        }
+
+
+
+    tmp = df.groupby(['session_id', 'level', 'room_fqid']).agg({'action_time' : ['sum', 'mean', 'std']})
+    tmp.columns = tmp.columns.map(''.join)
+    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'room_fqid'], values=['action_timesum', 'action_timemean', 'action_timestd'])
+    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
+    
+    if stage == 1:
+        level_range = range(0,5)
+        ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG1
+    elif stage == 2:
+        level_range = range(5,13)
+        ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG2
+    else:
+        level_range = range(13,23)
+        ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG3
+    
+    for level, cols in zip(list(level_range), ROOM_AT_LEVEL.values()):
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timestd' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timemean' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timestd' for i in cols])
+
+    cols_drop_no_std = ['5_tunic.historicalsociety.basement_action_timestd', '5_tunic.historicalsociety.entry_action_timestd', '6_tunic.historicalsociety.basement_action_timestd',\
+                        '6_tunic.historicalsociety.entry_action_timestd', '6_tunic.historicalsociety.stacks_action_timestd', '7_tunic.historicalsociety.stacks_action_timestd',\
+                        '11_tunic.historicalsociety.entry_action_timestd', '13_tunic.historicalsociety.entry_action_timestd', '14_tunic.historicalsociety.basement_action_timestd',\
+                        '15_tunic.historicalsociety.basement_action_timestd', '15_tunic.historicalsociety.stacks_action_timestd', '16_tunic.historicalsociety.basement_action_timestd',\
+                        '16_tunic.historicalsociety.entry_action_timestd', '16_tunic.historicalsociety.stacks_action_timestd', '21_tunic.historicalsociety.entry_action_timestd']    
+    COLS = np.array(COLS)[~np.isin(COLS, cols_drop_no_std)]
+    
+    if train == False:
+        ADD_COLUMNS = False
+        if stage == 1 and len(tmp_pivot.columns) != 34:
+            ADD_COLUMNS = True
+        elif stage == 2 and len(tmp_pivot.columns) != 68:
+            ADD_COLUMNS = True
+        elif stage == 3 and len(tmp_pivot.columns) != 90:
+            ADD_COLUMNS = True
+
+        if ADD_COLUMNS:
+            missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
+            for _col in missing_cols:
+                tmp_pivot[_col] = 0
+
+
+    tmp_pivot = tmp_pivot[COLS]
+    tmp_pivot = tmp_pivot.reset_index()
+    
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+    
+    
+    
     return _train
 
 
