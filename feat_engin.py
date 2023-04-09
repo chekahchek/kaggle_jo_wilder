@@ -266,7 +266,7 @@ def get_general_features(df, stage, train=True):
         ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG3
     
     for level, cols in zip(list(level_range), ROOM_AT_LEVEL.values()):
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timestd' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timesum' for i in cols])
         COLS.extend([str(level) + '_' + i + '_' + 'action_timemean' for i in cols])
         COLS.extend([str(level) + '_' + i + '_' + 'action_timestd' for i in cols])
 
