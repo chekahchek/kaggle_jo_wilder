@@ -278,18 +278,9 @@ def get_general_features(df, stage, train=True):
     COLS = np.array(COLS)[~np.isin(COLS, cols_drop_no_std)]
     
     if train == False:
-        ADD_COLUMNS = False
-        if stage == 1 and len(tmp_pivot.columns) != 34:
-            ADD_COLUMNS = True
-        elif stage == 2 and len(tmp_pivot.columns) != 68:
-            ADD_COLUMNS = True
-        elif stage == 3 and len(tmp_pivot.columns) != 90:
-            ADD_COLUMNS = True
-
-        if ADD_COLUMNS:
-            missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
-            for _col in missing_cols:
-                tmp_pivot[_col] = 0
+        missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
+        for _col in missing_cols:
+            tmp_pivot[_col] = 0
 
 
     tmp_pivot = tmp_pivot[COLS]
