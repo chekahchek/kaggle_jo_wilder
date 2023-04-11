@@ -4,22 +4,27 @@ import pandas as pd
 def get_general_features(df, stage, train=True):
     dfs = []
     
-    # 1 - Number of unique text
+    # Number of unique text
     tmp = df.groupby('session_id')['text'].nunique()
     tmp.name = 'unique_text'
     dfs.append(tmp)
+    
+    # Length of dataframe
+    tmp = df.groupby('session_id')['index'].count()
+    tmp.name = 'df_length'
+    dfs.append(tmp)
 
-    # 2 - Total elapsed time
+    # Total elapsed time
     tmp = df.groupby('session_id')['elapsed_time'].max()
     tmp.name = 'total_elapsed_time'
     dfs.append(tmp)
     
-    # 3 - Mean elapsed time 
+    # Mean elapsed time 
     tmp = df.groupby('session_id')['elapsed_time'].mean()
     tmp.name = 'mean_elapsed_time'
     dfs.append(tmp)
     
-    # 4 - Std Dev elapsed time 
+    # Std Dev elapsed time 
     tmp = df.groupby('session_id')['elapsed_time'].std()
     tmp.name = 'stddev_elapsed_time'
     dfs.append(tmp)
@@ -29,7 +34,7 @@ def get_general_features(df, stage, train=True):
     tmp.name = 'time_per_action'
     dfs.append(tmp)
     
-    # 6 - Hover duration
+    # Hover duration
     tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].sum()
     tmp.name = 'object_hover_sum'
     dfs.append(tmp)
@@ -55,12 +60,12 @@ def get_general_features(df, stage, train=True):
     dfs.append(tmp)
   
 
-    # 7 - Number of times notebook open
+    # Number of times notebook open
     tmp = df.loc[df['event_name']  == 'notebook_click', :].groupby('session_id')['event_name'].count()
     tmp.name = 'total_notebook_click'
     dfs.append(tmp)
 
-    # 8 - Time spent for each event_name
+    # Time spent for each event_name
     EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
     for event_name in EVENT_NAMES:
         tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].sum()
@@ -76,7 +81,7 @@ def get_general_features(df, stage, train=True):
         dfs.append(tmp)
 
     
-    # 9 - Time per room_fqid
+    # Time per room_fqid
     if stage == 1:
         room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
     elif stage == 2:
@@ -96,11 +101,39 @@ def get_general_features(df, stage, train=True):
         tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].std()
         tmp.name = room_fqid + 'time_std'
         dfs.append(tmp)
+        
+        
+    # Time per fqid
+    if stage == 1:
+        fqid_list = ['cs', 'gramps', 'groupconvo', 'notebook', 'plaque', 'plaque.face.date', 'retirement_letter', 'teddy', 'toentry', 'togrampa', 'tomap', 'tunic']
+    elif stage == 2:    
+        fqid_list = ['archivist', 'businesscards', 'businesscards.card_0.next', 'businesscards.card_1.next', 'businesscards.card_bingo.bingo', 'chap2_finale_c', 'gramps', 'journals',
+                     'journals.hub.topics', 'journals.pic_0.next', 'journals.pic_1.next', 'journals.pic_2.bingo', 'logbook', 'logbook.page.bingo', 'magnify', 'reader', 'reader.paper0.next',
+                     'reader.paper1.next', 'reader.paper2.bingo', 'tobasement', 'toentry', 'tofrontdesk', 'tomap', 'tostacks', 'trigger_coffee', 'trigger_scarf', 'tunic.capitol_1', 'tunic.drycleaner',
+                     'tunic.historicalsociety', 'tunic.humanecology', 'tunic.library', 'wellsbadge']
+    elif stage == 3:
+        fqid_list = ['archivist_glasses', 'boss', 'ch3start', 'chap4_finale_c', 'coffee', 'colorbook', 'confrontation', 'crane_ranger', 'directory', 'directory.closeup.archivist', 'expert', 'flag_girl',
+                     'glasses', 'gramps', 'groupconvo_flag', 'journals_flag', 'journals_flag.hub.topics', 'journals_flag.pic_0.bingo', 'journals_flag.pic_0.next', 'key', 'lockeddoor', 'reader_flag',
+                     'reader_flag.paper0.next', 'reader_flag.paper2.bingo', 'remove_cup', 'savedteddy', 'seescratches', 'teddy', 'tobasement', 'tocage', 'toentry', 'tofrontdesk', 'tomap', 'tostacks',
+                     'tracks', 'tracks.hub.deer', 'tunic.capitol_2', 'tunic.drycleaner', 'tunic.flaghouse', 'tunic.historicalsociety', 'tunic.library', 'tunic.wildlife', 'unlockdoor']
+
+    for fqid in fqid_list:
+        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].sum()
+        tmp.name = fqid + 'time_sum'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].mean()
+        tmp.name = fqid + 'time_mean'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].std()
+        tmp.name = fqid + 'time_std'
+        dfs.append(tmp)
     
     _train = pd.concat(dfs,axis=1).reset_index()
     
     
-    # 10 - Time per level - Sum, Mean, Median, Std
+    # Time per level - Sum, Mean, Median, Std
     tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std']}).reset_index()
     tmp.columns = tmp.columns.map(''.join)
     tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd'])
@@ -129,7 +162,7 @@ def get_general_features(df, stage, train=True):
     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     
-    #11 - Time per level and event
+    # Time per level and event
     COLS = []
     EVENT_AT_LEVEL_STG1 = {
         'level0_events' : ['navigate_click', 'notification_click', 'object_click', 'person_click'],
@@ -213,7 +246,7 @@ def get_general_features(df, stage, train=True):
     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     
-    #12 - Time per level and room
+    # Time per level and room
     COLS = []
     ROOM_AT_LEVEL_STG1 = {
             'level0_rooms' : ['tunic.historicalsociety.closet'],
