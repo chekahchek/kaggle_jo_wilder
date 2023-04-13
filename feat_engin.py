@@ -7,7 +7,7 @@ def get_general_features(df, stage, train=True):
     # Number of unique text
     tmp = df.groupby('session_id')[['text']].nunique().reset_index()
     tmp.columns = ['session_id', 'unique_text']
-    dfs.append(tmp.iloc[:, 1:])
+    dfs.append(tmp)
     
     # Length of dataframe
     tmp = df.groupby('session_id')[['index']].count().reset_index()
@@ -259,7 +259,7 @@ def get_general_features(df, stage, train=True):
     dfs.append(tmp_pivot.iloc[:, 1:])
     
     
-    _train = pd.concat(dfs,axis=1).reset_index()
+    _train = pd.concat(dfs,axis=1)
     
     return _train
 
