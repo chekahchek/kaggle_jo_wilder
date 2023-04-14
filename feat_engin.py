@@ -5,95 +5,110 @@ def get_general_features(df, stage, train=True):
     dfs = []
     
     # Number of unique text
-    tmp = df.groupby('session_id')[['text']].nunique().reset_index()
-    tmp.columns = ['session_id', 'unique_text']
+    tmp = df.groupby('session_id')['text'].nunique()
+    tmp.name = 'unique_text'
     dfs.append(tmp)
     
     # Length of dataframe
-    tmp = df.groupby('session_id')[['index']].count().reset_index()
-    tmp.columns = ['session_id', 'df_length']
-    dfs.append(tmp.iloc[:, 1:])
+    tmp = df.groupby('session_id')['index'].count()
+    tmp.name = 'df_length'
+    dfs.append(tmp)
 
     # Total elapsed time
-    tmp = df.groupby('session_id')['elapsed_time'].agg({'max', 'mean', 'median', 'std'}).reset_index()
-    tmp.columns = ['session_id', 'std_elapsed_time', 'total_elapsed_time', 'mean_elapsed_time', 'median_elapsed_time']
-    dfs.append(tmp.iloc[:, 1:])
+    tmp = df.groupby('session_id')['elapsed_time'].max()
+    tmp.name = 'total_elapsed_time'
+    dfs.append(tmp)
+    
+    # Mean elapsed time 
+    tmp = df.groupby('session_id')['elapsed_time'].mean()
+    tmp.name = 'mean_elapsed_time'
+    dfs.append(tmp)
+    
+    # Std Dev elapsed time 
+    tmp = df.groupby('session_id')['elapsed_time'].std()
+    tmp.name = 'stddev_elapsed_time'
+    dfs.append(tmp)
+    
+    # Median elapsed time 
+    tmp = df.groupby('session_id')['elapsed_time'].median()
+    tmp.name = 'median_elapsed_time'
+    dfs.append(tmp)
     
     # 5 - Average Time per action
-    tmp = (df.groupby('session_id')['elapsed_time'].max() / df.groupby('session_id').size()).to_frame().reset_index()
-    tmp.columns = ['session_id', 'time_per_action']
-    dfs.append(tmp.iloc[:, 1:])
+    tmp = df.groupby('session_id')['elapsed_time'].max() / df.groupby('session_id').size()
+    tmp.name = 'time_per_action'
+    dfs.append(tmp)
     
     # Hover duration
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].sum().to_frame().reset_index()
-    tmp.columns = ['session_id', 'object_hover_sum']
-    dfs.append(tmp.iloc[:, 1:])
-
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].std().to_frame().reset_index()
-    tmp.columns = ['session_id', 'object_hover_std']
-    dfs.append(tmp.iloc[:, 1:])
-
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].median().to_frame().reset_index()
-    tmp.columns = ['session_id', 'object_hover_median']
-    dfs.append(tmp.iloc[:, 1:])
-
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].mean().to_frame().reset_index()
-    tmp.columns = ['session_id', 'object_hover_mean']
-    dfs.append(tmp.iloc[:, 1:])
-
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].max().to_frame().reset_index()
-    tmp.columns = ['session_id', 'object_hover_max']
-    dfs.append(tmp.iloc[:, 1:])
-
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].sum().to_frame().reset_index()
-    tmp.columns = ['session_id', 'map_hover_sum']
-    dfs.append(tmp.iloc[:, 1:])
-
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].std().to_frame().reset_index()
-    tmp.columns = ['session_id', 'map_hover_std']
-    dfs.append(tmp.iloc[:, 1:])
-
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].median().to_frame().reset_index()
-    tmp.columns = ['session_id', 'map_hover_median']
-    dfs.append(tmp.iloc[:, 1:])
-
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].mean().to_frame().reset_index()
-    tmp.columns = ['session_id', 'map_hover_mean']
-    dfs.append(tmp.iloc[:, 1:])
+    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].sum()
+    tmp.name = 'object_hover_sum'
+    dfs.append(tmp)
     
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].max().to_frame().reset_index()
-    tmp.columns = ['session_id', 'map_hover_max']
-    dfs.append(tmp.iloc[:, 1:])
+    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].mean()
+    tmp.name = 'object_hover_mean'
+    dfs.append(tmp)
     
+    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].std()
+    tmp.name = 'object_hover_std'
+    dfs.append(tmp)
     
+    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].median()
+    tmp.name = 'object_hover_median'
+    dfs.append(tmp)
+    
+    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].max()
+    tmp.name = 'object_hover_max'
+    dfs.append(tmp)
+    
+    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].sum()
+    tmp.name = 'map_hover_sum'
+    dfs.append(tmp)
+    
+    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].mean()
+    tmp.name = 'map_hover_mean'
+    dfs.append(tmp)
+    
+    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].std()
+    tmp.name = 'map_hover_std'
+    dfs.append(tmp)
+    
+    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].median()
+    tmp.name = 'map_hover_median'
+    dfs.append(tmp)
+    
+    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].max()
+    tmp.name = 'map_hover_max'
+    dfs.append(tmp)
+  
+
     # Number of times notebook open
-    tmp = (df.loc[df['event_name']  == 'notebook_click', :].groupby('session_id')['event_name'].count()).to_frame().reset_index()
-    tmp.columns = ['session_id', 'total_notebook_click']
-    dfs.append(tmp.iloc[:, 1:])
+    tmp = df.loc[df['event_name']  == 'notebook_click', :].groupby('session_id')['event_name'].count()
+    tmp.name = 'total_notebook_click'
+    dfs.append(tmp)
 
-    
     # Time spent for each event_name
     EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
     for event_name in EVENT_NAMES:
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].sum().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{event_name}_time_sum"]
-        dfs.append(tmp.iloc[:, 1:])
+        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].sum()
+        tmp.name = event_name + '_time_sum'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].mean()
+        tmp.name = event_name + '_time_mean'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].std()
+        tmp.name = event_name + '_time_std'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].median()
+        tmp.name = event_name + '_time_median'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].max()
+        tmp.name = event_name + '_time_max'
+        dfs.append(tmp)
 
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].std().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{event_name}_time_std"]
-        dfs.append(tmp.iloc[:, 1:])
-
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].median().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{event_name}_time_median"]
-        dfs.append(tmp.iloc[:, 1:])
-
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].mean().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{event_name}_time_mean"]
-        dfs.append(tmp.iloc[:, 1:])
-
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].max().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{event_name}_time_max"]
-        dfs.append(tmp.iloc[:, 1:])
     
     # Time per room_fqid
     if stage == 1:
@@ -104,25 +119,25 @@ def get_general_features(df, stage, train=True):
         room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
     
     for room_fqid in room_fqid_list:
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].sum().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{room_fqid}_time_sum"]
-        dfs.append(tmp.iloc[:, 1:])
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].sum()
+        tmp.name = room_fqid + 'time_sum'
+        dfs.append(tmp)
 
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].std().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{room_fqid}_time_std"]
-        dfs.append(tmp.iloc[:, 1:])
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].mean()
+        tmp.name = room_fqid + 'time_mean'
+        dfs.append(tmp)
 
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].median().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{room_fqid}_time_median"]
-        dfs.append(tmp.iloc[:, 1:])
-
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].mean().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{room_fqid}_time_mean"]
-        dfs.append(tmp.iloc[:, 1:])
-
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].max().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{room_fqid}_time_max"]
-        dfs.append(tmp.iloc[:, 1:])
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].std()
+        tmp.name = room_fqid + 'time_std'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].median()
+        tmp.name = room_fqid + 'time_median'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].max()
+        tmp.name = room_fqid + 'time_max'
+        dfs.append(tmp)
         
         
     # Time per fqid
@@ -140,27 +155,28 @@ def get_general_features(df, stage, train=True):
                      'tracks', 'tracks.hub.deer', 'tunic.capitol_2', 'tunic.drycleaner', 'tunic.flaghouse', 'tunic.historicalsociety', 'tunic.library', 'tunic.wildlife', 'unlockdoor']
 
     for fqid in fqid_list:
-        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].sum().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{fqid}_time_sum"]
-        dfs.append(tmp.iloc[:, 1:])
-
-        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].std().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{fqid}_time_std"]
-        dfs.append(tmp.iloc[:, 1:])
-
-        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].median().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{fqid}_time_median"]
-        dfs.append(tmp.iloc[:, 1:])
-
-        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].mean().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{fqid}_time_mean"]
-        dfs.append(tmp.iloc[:, 1:])
-
-        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].max().to_frame().reset_index()
-        tmp.columns = ['session_id', f"{fqid}_time_max"]
-        dfs.append(tmp.iloc[:, 1:])
-    
+        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].sum()
+        tmp.name = fqid + 'time_sum'
+        dfs.append(tmp)
         
+        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].mean()
+        tmp.name = fqid + 'time_mean'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].std()
+        tmp.name = fqid + 'time_std'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].median()
+        tmp.name = fqid + 'time_median'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].max()
+        tmp.name = fqid + 'time_max'
+        dfs.append(tmp)
+    
+    _train = pd.concat(dfs,axis=1).reset_index()
+    
     
     # Time per level - Sum, Mean, Median, Std, Max
     tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std', 'max']}).reset_index()
@@ -170,21 +186,14 @@ def get_general_features(df, stage, train=True):
     tmp_pivot = tmp_pivot.reset_index()
     
     if train == False:
-        if stage == 1:
-            level_range = range(0,5)
-        elif stage == 2:
-            level_range = range(5,13)
-        elif stage == 3:
-            level_range = range(13,23)
-            
-        NEEDED_COLS = ['session_id'] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] + ['action_timestd_' + str(i) for i in level_range] +\
-        ['action_timesum_' + str(i) for i in level_range] + ['action_timemax_' + str(i) for i in level_range]
+        NEEDED_COLS = ['session_id'] + ['action_timemax_' + str(i) for i in level_range] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] +\
+        ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
         missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
         for _col in missing_cols:
             tmp_pivot[_col] = 0
         tmp_pivot = tmp_pivot[NEEDED_COLS]
         
-    dfs.append(tmp_pivot.iloc[:, 1:])
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     
     # Time per level and event
@@ -260,7 +269,7 @@ def get_general_features(df, stage, train=True):
 
     tmp_pivot = tmp_pivot[COLS]
     tmp_pivot = tmp_pivot.reset_index()
-    dfs.append(tmp_pivot.iloc[:, 1:])
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     
     # Time per level and room
@@ -337,13 +346,10 @@ def get_general_features(df, stage, train=True):
 
     tmp_pivot = tmp_pivot[COLS]
     tmp_pivot = tmp_pivot.reset_index()
-    dfs.append(tmp_pivot.iloc[:, 1:])
-    
-    
-    _train = pd.concat(dfs,axis=1)
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     return _train
-
+    
 
 def get_answer_time_1(df, train=True):
     df['relevant'] = (df['event_name'] == 'checkpoint')
