@@ -186,6 +186,13 @@ def get_general_features(df, stage, train=True):
     tmp_pivot = tmp_pivot.reset_index()
     
     if train == False:
+        if stage == 1:
+            level_range = range(0,5)
+        elif stage == 2:
+            level_range = range(5,13)
+        elif stage == 3:
+            level_range = range(13,23)
+            
         NEEDED_COLS = ['session_id'] + ['action_timemax_' + str(i) for i in level_range] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] +\
         ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
         missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
