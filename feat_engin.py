@@ -34,7 +34,24 @@ def get_general_features(df, stage, train=True):
     tmp.name = 'median_elapsed_time'
     dfs.append(tmp)
     
-    # 5 - Average Time per action
+    # Action time - Mean, Max, Median, Std
+    tmp = df.groupby('session_id')['action_time'].mean()
+    tmp.name = 'mean_action_time'
+    dfs.append(tmp)
+    
+    tmp = df.groupby('session_id')['action_time'].median()
+    tmp.name = 'median_action_time'
+    dfs.append(tmp)
+    
+    tmp = df.groupby('session_id')['action_time'].std()
+    tmp.name = 'std_action_time'
+    dfs.append(tmp)
+    
+    tmp = df.groupby('session_id')['action_time'].max()
+    tmp.name = 'max_action_time'
+    dfs.append(tmp)
+    
+    # Average Time per action
     tmp = df.groupby('session_id')['elapsed_time'].max() / df.groupby('session_id').size()
     tmp.name = 'time_per_action'
     dfs.append(tmp)
@@ -86,9 +103,13 @@ def get_general_features(df, stage, train=True):
     tmp.name = 'total_notebook_click'
     dfs.append(tmp)
 
-    # Time spent for each event_name
-    EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
+    # Count and time spent for each event_name
+    EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover', 'object_hover', 'notification_click','map_click','observation_click']
     for event_name in EVENT_NAMES:
+        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].count()
+        tmp.name = event_name + '_count'
+        dfs.append(tmp)
+        
         tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].sum()
         tmp.name = event_name + '_time_sum'
         dfs.append(tmp)
@@ -108,9 +129,37 @@ def get_general_features(df, stage, train=True):
         tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].max()
         tmp.name = event_name + '_time_max'
         dfs.append(tmp)
+        
+        
+    # Count and time spent for each name
+    NAMES = ['basic', 'close','next', 'open', 'prev', 'undefined']
+    for name in NAMES:
+        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].count()
+        tmp.name = name + '_time_count'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].sum()
+        tmp.name = name + '_time_sum'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].mean()
+        tmp.name = name + '_time_mean'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].std()
+        tmp.name = name + '_time_std'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].median()
+        tmp.name = name + '_time_median'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].max()
+        tmp.name = name + '_time_max'
+        dfs.append(tmp)
 
     
-    # Time per room_fqid
+    # Count and time per room_fqid
     if stage == 1:
         room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
     elif stage == 2:
@@ -119,6 +168,10 @@ def get_general_features(df, stage, train=True):
         room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
     
     for room_fqid in room_fqid_list:
+        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].count()
+        tmp.name = room_fqid + 'time_count'
+        dfs.append(tmp)
+        
         tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].sum()
         tmp.name = room_fqid + 'time_sum'
         dfs.append(tmp)
@@ -140,7 +193,7 @@ def get_general_features(df, stage, train=True):
         dfs.append(tmp)
         
         
-    # Time per fqid
+    # Count and time per fqid
     if stage == 1:
         fqid_list = ['cs', 'gramps', 'groupconvo', 'notebook', 'plaque', 'plaque.face.date', 'retirement_letter', 'teddy', 'toentry', 'togrampa', 'tomap', 'tunic']
     elif stage == 2:    
@@ -155,6 +208,10 @@ def get_general_features(df, stage, train=True):
                      'tracks', 'tracks.hub.deer', 'tunic.capitol_2', 'tunic.drycleaner', 'tunic.flaghouse', 'tunic.historicalsociety', 'tunic.library', 'tunic.wildlife', 'unlockdoor']
 
     for fqid in fqid_list:
+        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].count()
+        tmp.name = fqid + 'time_count'
+        dfs.append(tmp)
+        
         tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].sum()
         tmp.name = fqid + 'time_sum'
         dfs.append(tmp)
@@ -174,14 +231,58 @@ def get_general_features(df, stage, train=True):
         tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].max()
         tmp.name = fqid + 'time_max'
         dfs.append(tmp)
+        
+        
+    # Count and time per text_fqid
+    if stage == 1:
+        textfqid_list = ['tunic.historicalsociety.closet.gramps.intro_0_cs_0', 'tunic.historicalsociety.closet.retirement_letter.hub', 'tunic.historicalsociety.closet.teddy.intro_0_cs_0',
+                         'tunic.historicalsociety.entry.groupconvo','tunic.kohlcenter.halloffame.plaque.face.date','tunic.kohlcenter.halloffame.togrampa']
+    elif stage == 2 :
+        textfqid_list = ['tunic.drycleaner.frontdesk.logbook.page.bingo', 'tunic.drycleaner.frontdesk.worker.done', 'tunic.drycleaner.frontdesk.worker.hub',
+                         'tunic.historicalsociety.closet_dirty.gramps.news', 'tunic.historicalsociety.closet_dirty.trigger_coffee', 'tunic.historicalsociety.closet_dirty.trigger_scarf',
+                         'tunic.historicalsociety.closet_dirty.what_happened', 'tunic.historicalsociety.frontdesk.archivist.have_glass', 'tunic.historicalsociety.frontdesk.archivist.hello',
+                         'tunic.historicalsociety.frontdesk.archivist.newspaper', 'tunic.historicalsociety.stacks.journals.pic_2.bingo', 'tunic.humanecology.frontdesk.worker.intro',
+                         'tunic.library.frontdesk.worker.hello']
+    elif stage == 3:
+        textfqid_list = ['tunic.flaghouse.entry.flag_girl.hello', 'tunic.flaghouse.entry.flag_girl.symbol', 'tunic.historicalsociety.basement.ch3start', 'tunic.historicalsociety.basement.savedteddy',
+                         'tunic.historicalsociety.basement.seescratches', 'tunic.historicalsociety.cage.confrontation', 'tunic.historicalsociety.cage.glasses.afterteddy',
+                         'tunic.historicalsociety.cage.teddy.trapped', 'tunic.historicalsociety.cage.unlockdoor', 'tunic.historicalsociety.collection_flag.gramps.flag',
+                         'tunic.historicalsociety.entry.boss.flag', 'tunic.historicalsociety.entry.directory.closeup.archivist', 'tunic.historicalsociety.entry.groupconvo_flag',
+                         'tunic.historicalsociety.entry.wells.flag', 'tunic.historicalsociety.frontdesk.archivist_glasses.confrontation', 'tunic.historicalsociety.stacks.journals_flag.pic_0.bingo',
+                         'tunic.library.frontdesk.worker.flag', 'tunic.library.frontdesk.worker.nelson']
+        
+    for textfqid in textfqid_list:
+        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].count()
+        tmp.name = textfqid + 'time_count'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].sum()
+        tmp.name = textfqid + 'time_sum'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].mean()
+        tmp.name = textfqid + 'time_mean'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].std()
+        tmp.name = textfqid + 'time_std'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].median()
+        tmp.name = textfqid + 'time_median'
+        dfs.append(tmp)
+        
+        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].max()
+        tmp.name = textfqid + 'time_max'
+        dfs.append(tmp)
     
     _train = pd.concat(dfs,axis=1).reset_index()
     
     
-    # Time per level - Sum, Mean, Median, Std, Max
-    tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std', 'max']}).reset_index()
+    # Time per level - Sum, Mean, Median, Std, Max, Count
+    tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std', 'max', 'count']}).reset_index()
     tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd', 'action_timemax'])
+    tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd', 'action_timemax', 'action_timecount'])
     tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
     tmp_pivot = tmp_pivot.reset_index()
     
@@ -194,7 +295,7 @@ def get_general_features(df, stage, train=True):
             level_range = range(13,23)
             
         NEEDED_COLS = ['session_id'] + ['action_timemax_' + str(i) for i in level_range] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] +\
-        ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range]
+        ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range] + ['action_timecount_' + str(i) for i in level_range]
         missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
         for _col in missing_cols:
             tmp_pivot[_col] = 0
