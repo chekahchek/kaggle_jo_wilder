@@ -38,9 +38,9 @@ def get_addon_feat_polars(df, stage, train=False):
     }
 
 
-    tmp = df.groupby(['session_id', 'level', 'event_name']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max']}).reset_index()
+    tmp = df.groupby(['session_id', 'level', 'event_name']).agg({'elapsed_time_diff' : ['sum', 'mean', 'std', 'median', 'max']}).reset_index()
     tmp.columns = tmp.columns.map(''.join)
-    _train = tmp.pivot_table(index='session_id', columns=['level', 'event_name'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax'])
+    _train = tmp.pivot_table(index='session_id', columns=['level', 'event_name'], values=['elapsed_time_diffsum', 'elapsed_time_diffmean', 'elapsed_time_diffstd', 'elapsed_time_diffmedian', 'elapsed_time_diffmax'])
     _train.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in _train.columns]
 
     if stage == 1:
@@ -54,17 +54,18 @@ def get_addon_feat_polars(df, stage, train=False):
         EVENT_AT_LEVEL = EVENT_AT_LEVEL_STG3
 
     for level, cols in zip(list(level_range), EVENT_AT_LEVEL.values()):
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timesum' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timemean' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timestd' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timemedian' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timemax' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'elapsed_time_diffsum' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'elapsed_time_diffmean' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'elapsed_time_diffstd' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'elapsed_time_diffmedian' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'elapsed_time_diffmax' for i in cols])
 
-    cols_drop_no_std = ['0_notification_click_action_timestd', '3_map_click_action_timestd', '4_map_click_action_timestd', '5_map_click_action_timestd', '6_observation_click_action_timestd', \
-                        '7_map_click_action_timestd', '7_notification_click_action_timestd', '8_map_click_action_timestd', '9_map_click_action_timestd', '10_notification_click_action_timestd',\
-                        '10_object_click_action_timestd', '11_map_click_action_timestd', '12_map_click_action_timestd', '13_map_click_action_timestd', '18_map_click_action_timestd', \
-                        '18_notification_click_action_timestd', '19_map_click_action_timestd', '19_notification_click_action_timestd', '20_notification_click_action_timestd', \
-                        '20_map_click_action_timestd', '21_map_click_action_timestd', '22_map_click_action_timestd']
+    cols_drop_no_std = ['0_notification_click_elapsed_time_diffstd', '3_map_click_elapsed_time_diffstd', '4_map_click_elapsed_time_diffstd', '5_map_click_elapsed_time_diffstd',
+                        '6_observation_click_elapsed_time_diffstd', '7_map_click_elapsed_time_diffstd', '7_notification_click_elapsed_time_diffstd', '8_map_click_elapsed_time_diffstd',
+                        '9_map_click_elapsed_time_diffstd', '10_notification_click_elapsed_time_diffstd',
+                        '10_object_click_elapsed_time_diffstd', '11_map_click_elapsed_time_diffstd', '12_map_click_elapsed_time_diffstd', '13_map_click_elapsed_time_diffstd',
+                        '18_map_click_elapsed_time_diffstd', '18_notification_click_elapsed_time_diffstd', '19_map_click_elapsed_time_diffstd', '19_notification_click_elapsed_time_diffstd',
+                        '20_notification_click_elapsed_time_diffstd', '20_map_click_elapsed_time_diffstd', '21_map_click_elapsed_time_diffstd', '22_map_click_elapsed_time_diffstd']
 
     COLS = np.array(COLS)[~np.isin(COLS, cols_drop_no_std)]
 
@@ -113,9 +114,10 @@ def get_addon_feat_polars(df, stage, train=False):
 
 
 
-    tmp = df.groupby(['session_id', 'level', 'room_fqid']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max']})
+    tmp = df.groupby(['session_id', 'level', 'room_fqid']).agg({'elapsed_time_diff' : ['sum', 'mean', 'std', 'median', 'max']})
     tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'room_fqid'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax'])
+    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'room_fqid'], values=['elapsed_time_diffsum', 'elapsed_time_diffmean', 'elapsed_time_diffstd', 'elapsed_time_diffmedian',
+                                                                                            'elapsed_time_diffmax'])
     tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
     
     if stage == 1:
@@ -129,17 +131,17 @@ def get_addon_feat_polars(df, stage, train=False):
         ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG3
     
     for level, cols in zip(list(level_range), ROOM_AT_LEVEL.values()):
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timesum' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timemean' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timestd' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timemedian' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timemax' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'elapsed_time_diffsum' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'elapsed_time_diffmean' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'elapsed_time_diffstd' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'elapsed_time_diffmedian' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'elapsed_time_diffmax' for i in cols])
 
-    cols_drop_no_std = ['5_tunic.historicalsociety.basement_action_timestd', '5_tunic.historicalsociety.entry_action_timestd', '6_tunic.historicalsociety.basement_action_timestd',\
-                        '6_tunic.historicalsociety.entry_action_timestd', '6_tunic.historicalsociety.stacks_action_timestd', '7_tunic.historicalsociety.stacks_action_timestd',\
-                        '11_tunic.historicalsociety.entry_action_timestd', '13_tunic.historicalsociety.entry_action_timestd', '14_tunic.historicalsociety.basement_action_timestd',\
-                        '15_tunic.historicalsociety.basement_action_timestd', '15_tunic.historicalsociety.stacks_action_timestd', '16_tunic.historicalsociety.basement_action_timestd',\
-                        '16_tunic.historicalsociety.entry_action_timestd', '16_tunic.historicalsociety.stacks_action_timestd', '21_tunic.historicalsociety.entry_action_timestd']    
+    cols_drop_no_std = ['5_tunic.historicalsociety.basement_elapsed_time_diffstd', '5_tunic.historicalsociety.entry_elapsed_time_diffstd', '6_tunic.historicalsociety.basement_elapsed_time_diffstd',\
+                        '6_tunic.historicalsociety.entry_elapsed_time_diffstd', '6_tunic.historicalsociety.stacks_elapsed_time_diffstd', '7_tunic.historicalsociety.stacks_elapsed_time_diffstd',\
+                        '11_tunic.historicalsociety.entry_elapsed_time_diffstd', '13_tunic.historicalsociety.entry_elapsed_time_diffstd', '14_tunic.historicalsociety.basement_elapsed_time_diffstd',\
+                        '15_tunic.historicalsociety.basement_elapsed_time_diffstd', '15_tunic.historicalsociety.stacks_elapsed_time_diffstd', '16_tunic.historicalsociety.basement_elapsed_time_diffstd',\
+                        '16_tunic.historicalsociety.entry_elapsed_time_diffstd', '16_tunic.historicalsociety.stacks_elapsed_time_diffstd', '21_tunic.historicalsociety.entry_elapsed_time_diffstd']    
     COLS = np.array(COLS)[~np.isin(COLS, cols_drop_no_std)]
     
     if train == False:
