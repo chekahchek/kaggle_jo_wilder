@@ -1,291 +1,185 @@
 import numpy as np
 import pandas as pd
+import polars as pl
 
-def get_general_features(df, stage, train=True):
-    dfs = []
+def get_general_features_1(df, stage, train=True):
+    df = pl.DataFrame(df)
     
-    # Number of unique text
-    tmp = df.groupby('session_id')['text'].nunique()
-    tmp.name = 'unique_text'
-    dfs.append(tmp)
-    
-    # Length of dataframe
-    tmp = df.groupby('session_id')['index'].count()
-    tmp.name = 'df_length'
-    dfs.append(tmp)
-
-    # Total elapsed time
-    tmp = df.groupby('session_id')['elapsed_time'].max()
-    tmp.name = 'total_elapsed_time'
-    dfs.append(tmp)
-    
-    # Mean elapsed time 
-    tmp = df.groupby('session_id')['elapsed_time'].mean()
-    tmp.name = 'mean_elapsed_time'
-    dfs.append(tmp)
-    
-    # Std Dev elapsed time 
-    tmp = df.groupby('session_id')['elapsed_time'].std()
-    tmp.name = 'stddev_elapsed_time'
-    dfs.append(tmp)
-    
-    # Median elapsed time 
-    tmp = df.groupby('session_id')['elapsed_time'].median()
-    tmp.name = 'median_elapsed_time'
-    dfs.append(tmp)
-    
-    # 5 - Average Time per action
-    tmp = df.groupby('session_id')['elapsed_time'].max() / df.groupby('session_id').size()
-    tmp.name = 'time_per_action'
-    dfs.append(tmp)
-    
-    # Hover duration
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].sum()
-    tmp.name = 'object_hover_sum'
-    dfs.append(tmp)
-    
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].mean()
-    tmp.name = 'object_hover_mean'
-    dfs.append(tmp)
-    
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].std()
-    tmp.name = 'object_hover_std'
-    dfs.append(tmp)
-    
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].median()
-    tmp.name = 'object_hover_median'
-    dfs.append(tmp)
-    
-    tmp = df.loc[df['event_name']  == 'object_hover', :].groupby('session_id')['hover_duration'].max()
-    tmp.name = 'object_hover_max'
-    dfs.append(tmp)
-    
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].sum()
-    tmp.name = 'map_hover_sum'
-    dfs.append(tmp)
-    
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].mean()
-    tmp.name = 'map_hover_mean'
-    dfs.append(tmp)
-    
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].std()
-    tmp.name = 'map_hover_std'
-    dfs.append(tmp)
-    
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].median()
-    tmp.name = 'map_hover_median'
-    dfs.append(tmp)
-    
-    tmp = df.loc[df['event_name']  == 'map_hover', :].groupby('session_id')['hover_duration'].max()
-    tmp.name = 'map_hover_max'
-    dfs.append(tmp)
-  
-
-    # Number of times notebook open
-    tmp = df.loc[df['event_name']  == 'notebook_click', :].groupby('session_id')['event_name'].count()
-    tmp.name = 'total_notebook_click'
-    dfs.append(tmp)
-
-    # Time spent for each event_name
     EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
-    for event_name in EVENT_NAMES:
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].count()
-        tmp.name = event_name + '_count'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].sum()
-        tmp.name = event_name + '_time_sum'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].mean()
-        tmp.name = event_name + '_time_mean'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].std()
-        tmp.name = event_name + '_time_std'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].median()
-        tmp.name = event_name + '_time_median'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['event_name'] == event_name, :].groupby('session_id')['action_time'].max()
-        tmp.name = event_name + '_time_max'
-        dfs.append(tmp)
+    NAMES = ['basic', 'close', 'open', 'undefined']
+    
+    textfqid_list = ['tunic.historicalsociety.cage.confrontation', 'tunic.wildlife.center.crane_ranger.crane', 'tunic.historicalsociety.frontdesk.archivist.newspaper', 
+                     'tunic.historicalsociety.entry.groupconvo', 'tunic.wildlife.center.wells.nodeer', 'tunic.historicalsociety.frontdesk.archivist.have_glass', 'tunic.drycleaner.frontdesk.worker.hub', 
+                     'tunic.historicalsociety.closet_dirty.gramps.news', 'tunic.humanecology.frontdesk.worker.intro', 'tunic.historicalsociety.frontdesk.archivist_glasses.confrontation', 
+                     'tunic.historicalsociety.basement.seescratches', 'tunic.historicalsociety.collection.cs', 'tunic.flaghouse.entry.flag_girl.hello', 'tunic.historicalsociety.collection.gramps.found', 
+                     'tunic.historicalsociety.basement.ch3start', 'tunic.historicalsociety.entry.groupconvo_flag', 'tunic.library.frontdesk.worker.hello', 'tunic.library.frontdesk.worker.wells', 
+                     'tunic.historicalsociety.collection_flag.gramps.flag', 'tunic.historicalsociety.basement.savedteddy', 'tunic.library.frontdesk.worker.nelson', 
+                     'tunic.wildlife.center.expert.removed_cup', 'tunic.library.frontdesk.worker.flag', 'tunic.historicalsociety.frontdesk.archivist.hello', 
+                     'tunic.historicalsociety.closet.gramps.intro_0_cs_0', 'tunic.historicalsociety.entry.boss.flag','tunic.flaghouse.entry.flag_girl.symbol',
+                     'tunic.historicalsociety.closet_dirty.trigger_scarf', 'tunic.drycleaner.frontdesk.worker.done', 'tunic.historicalsociety.closet_dirty.what_happened', 
+                     'tunic.wildlife.center.wells.animals', 'tunic.historicalsociety.closet.teddy.intro_0_cs_0', 'tunic.historicalsociety.cage.glasses.afterteddy',
+                     'tunic.historicalsociety.cage.teddy.trapped', 'tunic.historicalsociety.cage.unlockdoor', 'tunic.historicalsociety.stacks.journals.pic_2.bingo',
+                     'tunic.historicalsociety.entry.wells.flag', 'tunic.humanecology.frontdesk.worker.badger', 'tunic.historicalsociety.stacks.journals_flag.pic_0.bingo', 
+                     'tunic.historicalsociety.closet.intro', 'tunic.historicalsociety.closet.retirement_letter.hub','tunic.historicalsociety.entry.directory.closeup.archivist',
+                     'tunic.historicalsociety.collection.tunic.slip', 'tunic.kohlcenter.halloffame.plaque.face.date', 'tunic.historicalsociety.closet_dirty.trigger_coffee',
+                     'tunic.drycleaner.frontdesk.logbook.page.bingo', 'tunic.library.microfiche.reader.paper2.bingo', 'tunic.kohlcenter.halloffame.togrampa', 'tunic.capitol_2.hall.boss.haveyougotit',
+                     'tunic.wildlife.center.wells.nodeer_recap', 'tunic.historicalsociety.cage.glasses.beforeteddy','tunic.historicalsociety.closet_dirty.gramps.helpclean',
+                     'tunic.wildlife.center.expert.recap', 'tunic.historicalsociety.frontdesk.archivist.have_glass_recap', 'tunic.historicalsociety.stacks.journals_flag.pic_1.bingo',
+                     'tunic.historicalsociety.cage.lockeddoor', 'tunic.historicalsociety.stacks.journals_flag.pic_2.bingo', 'tunic.historicalsociety.collection.gramps.lost', 
+                     'tunic.historicalsociety.closet.notebook', 'tunic.historicalsociety.frontdesk.magnify', 'tunic.humanecology.frontdesk.businesscards.card_bingo.bingo',
+                     'tunic.wildlife.center.remove_cup', 'tunic.library.frontdesk.wellsbadge.hub', 'tunic.wildlife.center.tracks.hub.deer', 'tunic.historicalsociety.frontdesk.key',
+                     'tunic.library.microfiche.reader_flag.paper2.bingo', 'tunic.flaghouse.entry.colorbook', 'tunic.wildlife.center.coffee', 
+                     'tunic.capitol_1.hall.boss.haveyougotit', 'tunic.historicalsociety.basement.janitor', 'tunic.historicalsociety.collection_flag.gramps.recap', 'tunic.wildlife.center.wells.animals2',
+                     'tunic.flaghouse.entry.flag_girl.symbol_recap', 'tunic.historicalsociety.closet_dirty.photo', 'tunic.historicalsociety.stacks.outtolunch',
+                     'tunic.library.frontdesk.worker.wells_recap', 'tunic.historicalsociety.frontdesk.archivist_glasses.confrontation_recap', 'tunic.capitol_0.hall.boss.talktogramps',
+                     'tunic.historicalsociety.closet.photo', 'tunic.historicalsociety.collection.tunic', 'tunic.historicalsociety.closet.teddy.intro_0_cs_5',
+                     'tunic.historicalsociety.closet_dirty.gramps.archivist', 'tunic.historicalsociety.closet_dirty.door_block_talk', 'tunic.historicalsociety.entry.boss.flag_recap', 
+                     'tunic.historicalsociety.frontdesk.archivist.need_glass_0', 'tunic.historicalsociety.entry.wells.talktogramps', 'tunic.historicalsociety.frontdesk.block_magnify',
+                     'tunic.historicalsociety.frontdesk.archivist.foundtheodora', 'tunic.historicalsociety.closet_dirty.gramps.nothing', 'tunic.historicalsociety.closet_dirty.door_block_clean',
+                     'tunic.capitol_1.hall.boss.writeitup', 'tunic.library.frontdesk.worker.nelson_recap', 'tunic.library.frontdesk.worker.hello_short', 'tunic.historicalsociety.stacks.block',
+                     'tunic.historicalsociety.frontdesk.archivist.need_glass_1', 'tunic.historicalsociety.entry.boss.talktogramps', 'tunic.historicalsociety.frontdesk.archivist.newspaper_recap',
+                     'tunic.historicalsociety.entry.wells.flag_recap', 'tunic.drycleaner.frontdesk.worker.done2', 'tunic.library.frontdesk.worker.flag_recap', 'tunic.humanecology.frontdesk.block_0',
+                     'tunic.library.frontdesk.worker.preflag', 'tunic.historicalsociety.basement.gramps.seeyalater', 'tunic.flaghouse.entry.flag_girl.hello_recap',
+                     'tunic.historicalsociety.closet.doorblock','tunic.drycleaner.frontdesk.worker.takealook','tunic.historicalsociety.basement.gramps.whatdo', 
+                     'tunic.library.frontdesk.worker.droppedbadge', 'tunic.historicalsociety.entry.block_tomap2', 'tunic.library.frontdesk.block_nelson', 'tunic.library.microfiche.block_0',
+                     'tunic.historicalsociety.entry.block_tocollection', 'tunic.historicalsociety.entry.block_tomap1', 'tunic.historicalsociety.collection.gramps.look_0',
+                     'tunic.library.frontdesk.block_badge', 'tunic.historicalsociety.cage.need_glasses', 'tunic.library.frontdesk.block_badge_2', 'tunic.kohlcenter.halloffame.block_0', 
+                     'tunic.capitol_0.hall.chap1_finale_c', 'tunic.capitol_1.hall.chap2_finale_c', 'tunic.capitol_2.hall.chap4_finale_c', 'tunic.wildlife.center.fox.concern',
+                     'tunic.drycleaner.frontdesk.block_0', 'tunic.historicalsociety.entry.gramps.hub', 'tunic.humanecology.frontdesk.block_1', 'tunic.drycleaner.frontdesk.block_1']
+    
+    room_fqid_list = ['tunic.historicalsociety.entry', 'tunic.wildlife.center', 'tunic.historicalsociety.cage', 'tunic.library.frontdesk', 'tunic.historicalsociety.frontdesk',
+                      'tunic.historicalsociety.stacks', 'tunic.historicalsociety.closet_dirty', 'tunic.humanecology.frontdesk', 'tunic.historicalsociety.basement', 'tunic.kohlcenter.halloffame',
+                      'tunic.library.microfiche', 'tunic.drycleaner.frontdesk', 'tunic.historicalsociety.collection', 'tunic.historicalsociety.closet', 'tunic.flaghouse.entry',
+                      'tunic.historicalsociety.collection_flag', 'tunic.capitol_1.hall', 'tunic.capitol_0.hall', 'tunic.capitol_2.hall']
+    
+    fqid_list = ['worker', 'archivist', 'gramps', 'wells', 'toentry', 'confrontation', 'crane_ranger', 'groupconvo', 'flag_girl', 'tomap', 'tostacks', 'tobasement', 'archivist_glasses', 'boss', 
+                 'journals', 'seescratches', 'groupconvo_flag', 'cs', 'teddy', 'expert', 'businesscards', 'ch3start', 'tunic.historicalsociety', 'tofrontdesk', 'savedteddy', 'plaque', 'glasses', 
+                 'tunic.drycleaner', 'reader_flag', 'tunic.library', 'tracks', 'tunic.capitol_2', 'trigger_scarf', 'reader', 'directory', 'tunic.capitol_1', 'journals.pic_0.next', 'unlockdoor', 'tunic', 
+                 'what_happened', 'tunic.kohlcenter', 'tunic.humanecology', 'colorbook', 'logbook', 'businesscards.card_0.next', 'journals.hub.topics', 'logbook.page.bingo', 'journals.pic_1.next', 
+                 'journals_flag', 'reader.paper0.next', 'tracks.hub.deer', 'reader_flag.paper0.next', 'trigger_coffee', 'wellsbadge', 'journals.pic_2.next', 'tomicrofiche', 'journals_flag.pic_0.bingo', 
+                 'plaque.face.date', 'notebook', 'tocloset_dirty', 'businesscards.card_bingo.bingo', 'businesscards.card_1.next', 'tunic.wildlife', 'tunic.hub.slip', 'tocage', 'journals.pic_2.bingo', 
+                 'tocollectionflag', 'tocollection', 'chap4_finale_c', 'chap2_finale_c', 'lockeddoor', 'journals_flag.hub.topics', 'tunic.capitol_0', 'reader_flag.paper2.bingo', 'photo', 
+                 'tunic.flaghouse', 'reader.paper1.next', 'directory.closeup.archivist', 'intro', 'businesscards.card_bingo.next', 'reader.paper2.bingo', 'retirement_letter', 'remove_cup', 
+                 'journals_flag.pic_0.next', 'magnify', 'coffee', 'key', 'togrampa', 'reader_flag.paper1.next', 'janitor', 'tohallway', 'chap1_finale', 'report', 'outtolunch', 
+                 'journals_flag.hub.topics_old', 'journals_flag.pic_1.next', 'reader.paper2.next', 'chap1_finale_c', 'reader_flag.paper2.next', 'door_block_talk', 'journals_flag.pic_1.bingo', 
+                 'journals_flag.pic_2.next', 'journals_flag.pic_2.bingo', 'block_magnify', 'reader.paper0.prev', 'block', 'reader_flag.paper0.prev', 'block_0', 'door_block_clean', 'reader.paper2.prev', 
+                 'reader.paper1.prev', 'doorblock', 'tocloset', 'reader_flag.paper2.prev', 'reader_flag.paper1.prev', 'block_tomap2', 'journals_flag.pic_0_old.next', 'journals_flag.pic_1_old.next', 
+                 'block_tocollection', 'block_nelson', 'journals_flag.pic_2_old.next', 'block_tomap1', 'block_badge', 'need_glasses', 'block_badge_2', 'fox', 'block_1']
 
-    # Count and time spent for each name
-    NAMES = ['basic', 'close','next', 'open', 'prev', 'undefined']
-    for name in NAMES:
-        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].count()
-        tmp.name = name + '_time_count'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].sum()
-        tmp.name = name + '_time_sum'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].mean()
-        tmp.name = name + '_time_mean'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].std()
-        tmp.name = name + '_time_std'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].median()
-        tmp.name = name + '_time_median'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['name'] == name, :].groupby('session_id')['action_time'].max()
-        tmp.name = name + '_time_max'
-        dfs.append(tmp)
-        
-        
-    # Count and time per room_fqid
     if stage == 1:
-        room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
+        levels = list(range(0,5))
+        # room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
+        # fqid_list = ['cs', 'gramps', 'groupconvo', 'notebook', 'plaque', 'plaque.face.date', 'retirement_letter', 'teddy', 'toentry', 'togrampa', 'tomap', 'tunic']
+        # textfqid_list = ['tunic.historicalsociety.closet.gramps.intro_0_cs_0', 'tunic.historicalsociety.closet.retirement_letter.hub', 'tunic.historicalsociety.closet.teddy.intro_0_cs_0',
+        #                  'tunic.historicalsociety.entry.groupconvo','tunic.kohlcenter.halloffame.plaque.face.date','tunic.kohlcenter.halloffame.togrampa']
     elif stage == 2:
-        room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks', 'tunic.capitol_0.hall']
+        levels = list(range(5,13))
+        # room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks', 'tunic.capitol_0.hall']
+        # fqid_list = ['archivist', 'businesscards', 'businesscards.card_0.next', 'businesscards.card_1.next', 'businesscards.card_bingo.bingo', 'chap2_finale_c', 'gramps', 'journals',
+        #              'journals.hub.topics', 'journals.pic_0.next', 'journals.pic_1.next', 'journals.pic_2.bingo', 'logbook', 'logbook.page.bingo', 'magnify', 'reader', 'reader.paper0.next',
+        #              'reader.paper1.next', 'reader.paper2.bingo', 'tobasement', 'toentry', 'tofrontdesk', 'tomap', 'tostacks', 'trigger_coffee', 'trigger_scarf', 'tunic.capitol_1', 'tunic.drycleaner',
+        #              'tunic.historicalsociety', 'tunic.humanecology', 'tunic.library', 'wellsbadge']
+        # textfqid_list = ['tunic.drycleaner.frontdesk.logbook.page.bingo', 'tunic.drycleaner.frontdesk.worker.done', 'tunic.drycleaner.frontdesk.worker.hub',
+        #                  'tunic.historicalsociety.closet_dirty.gramps.news', 'tunic.historicalsociety.closet_dirty.trigger_coffee', 'tunic.historicalsociety.closet_dirty.trigger_scarf',
+        #                  'tunic.historicalsociety.closet_dirty.what_happened', 'tunic.historicalsociety.frontdesk.archivist.have_glass', 'tunic.historicalsociety.frontdesk.archivist.hello',
+        #                  'tunic.historicalsociety.frontdesk.archivist.newspaper', 'tunic.historicalsociety.stacks.journals.pic_2.bingo', 'tunic.humanecology.frontdesk.worker.intro',
+        #                  'tunic.library.frontdesk.worker.hello']
     elif stage == 3:
-        room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
-    
-    for room_fqid in room_fqid_list:
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].count()
-        tmp.name = room_fqid + 'time_count'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].sum()
-        tmp.name = room_fqid + 'time_sum'
-        dfs.append(tmp)
+        levels = list(range(13,23))
+        # room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
+        # fqid_list = ['archivist_glasses', 'boss', 'ch3start', 'chap4_finale_c', 'coffee', 'colorbook', 'confrontation', 'crane_ranger', 'directory', 'directory.closeup.archivist', 'expert', 'flag_girl',
+        #              'glasses', 'gramps', 'groupconvo_flag', 'journals_flag', 'journals_flag.hub.topics', 'journals_flag.pic_0.bingo', 'journals_flag.pic_0.next', 'key', 'lockeddoor', 'reader_flag',
+        #              'reader_flag.paper0.next', 'reader_flag.paper2.bingo', 'remove_cup', 'savedteddy', 'seescratches', 'teddy', 'tobasement', 'tocage', 'toentry', 'tofrontdesk', 'tomap', 'tostacks',
+        #              'tracks', 'tracks.hub.deer', 'tunic.capitol_2', 'tunic.drycleaner', 'tunic.flaghouse', 'tunic.historicalsociety', 'tunic.library', 'tunic.wildlife', 'unlockdoor']
+        # textfqid_list = ['tunic.flaghouse.entry.flag_girl.hello', 'tunic.flaghouse.entry.flag_girl.symbol', 'tunic.historicalsociety.basement.ch3start', 'tunic.historicalsociety.basement.savedteddy',
+        #                  'tunic.historicalsociety.basement.seescratches', 'tunic.historicalsociety.cage.confrontation', 'tunic.historicalsociety.cage.glasses.afterteddy',
+        #                  'tunic.historicalsociety.cage.teddy.trapped', 'tunic.historicalsociety.cage.unlockdoor', 'tunic.historicalsociety.collection_flag.gramps.flag',
+        #                  'tunic.historicalsociety.entry.boss.flag', 'tunic.historicalsociety.entry.directory.closeup.archivist', 'tunic.historicalsociety.entry.groupconvo_flag',
+        #                  'tunic.historicalsociety.entry.wells.flag', 'tunic.historicalsociety.frontdesk.archivist_glasses.confrontation', 'tunic.historicalsociety.stacks.journals_flag.pic_0.bingo',
+        #                  'tunic.library.frontdesk.worker.flag', 'tunic.library.frontdesk.worker.nelson']
 
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].mean()
-        tmp.name = room_fqid + 'time_mean'
-        dfs.append(tmp)
 
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].std()
-        tmp.name = room_fqid + 'time_std'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].median()
-        tmp.name = room_fqid + 'time_median'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['room_fqid'] == room_fqid, :].groupby('session_id')['action_time'].max()
-        tmp.name = room_fqid + 'time_max'
-        dfs.append(tmp)
-        
-        
-    # Count and time per fqid
-    if stage == 1:
-        fqid_list = ['cs', 'gramps', 'groupconvo', 'notebook', 'plaque', 'plaque.face.date', 'retirement_letter', 'teddy', 'toentry', 'togrampa', 'tomap', 'tunic']
-    elif stage == 2:    
-        fqid_list = ['archivist', 'businesscards', 'businesscards.card_0.next', 'businesscards.card_1.next', 'businesscards.card_bingo.bingo', 'chap2_finale_c', 'gramps', 'journals',
-                     'journals.hub.topics', 'journals.pic_0.next', 'journals.pic_1.next', 'journals.pic_2.bingo', 'logbook', 'logbook.page.bingo', 'magnify', 'reader', 'reader.paper0.next',
-                     'reader.paper1.next', 'reader.paper2.bingo', 'tobasement', 'toentry', 'tofrontdesk', 'tomap', 'tostacks', 'trigger_coffee', 'trigger_scarf', 'tunic.capitol_1', 'tunic.drycleaner',
-                     'tunic.historicalsociety', 'tunic.humanecology', 'tunic.library', 'wellsbadge']
-    elif stage == 3:
-        fqid_list = ['archivist_glasses', 'boss', 'ch3start', 'chap4_finale_c', 'coffee', 'colorbook', 'confrontation', 'crane_ranger', 'directory', 'directory.closeup.archivist', 'expert', 'flag_girl',
-                     'glasses', 'gramps', 'groupconvo_flag', 'journals_flag', 'journals_flag.hub.topics', 'journals_flag.pic_0.bingo', 'journals_flag.pic_0.next', 'key', 'lockeddoor', 'reader_flag',
-                     'reader_flag.paper0.next', 'reader_flag.paper2.bingo', 'remove_cup', 'savedteddy', 'seescratches', 'teddy', 'tobasement', 'tocage', 'toentry', 'tofrontdesk', 'tomap', 'tostacks',
-                     'tracks', 'tracks.hub.deer', 'tunic.capitol_2', 'tunic.drycleaner', 'tunic.flaghouse', 'tunic.historicalsociety', 'tunic.library', 'tunic.wildlife', 'unlockdoor']
+    aggs = [
+        #Number of unique text
+        pl.col('text').n_unique().alias('unique_text'), 
 
-    for fqid in fqid_list:
-        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].count()
-        tmp.name = fqid + 'time_count'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].sum()
-        tmp.name = fqid + 'time_sum'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].mean()
-        tmp.name = fqid + 'time_mean'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].std()
-        tmp.name = fqid + 'time_std'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].median()
-        tmp.name = fqid + 'time_median'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['fqid'] == fqid, :].groupby('session_id')['action_time'].max()
-        tmp.name = fqid + 'time_max'
-        dfs.append(tmp)
+        #Length of dataframe
+        pl.col('index').count().alias('df_length'),
+
+        #Elapsed time
+        pl.col('elapsed_time').max().alias('total_elapsed_time'),
+        pl.col('elapsed_time').mean().alias('mean_elapsed_time'),
+        pl.col('elapsed_time').std().alias('stddev_elapsed_time'),
+        pl.col('elapsed_time').median().alias('median_elapsed_time'),
+
+        #Hover duration
+        *[pl.col('hover_duration').filter(pl.col('event_name') == i).count().alias(f"{i}_duration_count") for i in ['object_hover', 'map_hover']],
+        *[pl.col('hover_duration').filter(pl.col('event_name') == i).sum().alias(f"{i}_duration_sum") for i in ['object_hover', 'map_hover']],
+        *[pl.col('hover_duration').filter(pl.col('event_name') == i).mean().alias(f"{i}_duration_mean") for i in ['object_hover', 'map_hover']],
+        *[pl.col('hover_duration').filter(pl.col('event_name') == i).std().alias(f"{i}_duration_std") for i in ['object_hover', 'map_hover']],
+        *[pl.col('hover_duration').filter(pl.col('event_name') == i).std().alias(f"{i}_duration_median") for i in ['object_hover', 'map_hover']],
+        *[pl.col('hover_duration').filter(pl.col('event_name') == i).max().alias(f"{i}_duration_max") for i in ['object_hover', 'map_hover']],
+
+        #Number of times notebook open
+        pl.col('event_name').filter(pl.col('event_name') == 'notebook_click').count().alias('total_notebook_click'),
+
+        #Time spent for each event_name
+        *[pl.col('action_time').filter(pl.col('event_name') == i).count().alias(f"{i}_count") for i in EVENT_NAMES],
+        *[pl.col('action_time').filter(pl.col('event_name') == i).sum().alias(f"{i}_time_sum") for i in EVENT_NAMES],
+        *[pl.col('action_time').filter(pl.col('event_name') == i).mean().alias(f"{i}_time_mean") for i in EVENT_NAMES],
+        *[pl.col('action_time').filter(pl.col('event_name') == i).std().alias(f"{i}_time_std") for i in EVENT_NAMES],
+        *[pl.col('action_time').filter(pl.col('event_name') == i).median().alias(f"{i}_time_median") for i in EVENT_NAMES],
+        *[pl.col('action_time').filter(pl.col('event_name') == i).max().alias(f"{i}_time_max") for i in EVENT_NAMES],
+
+        #Count and time spent for each name
+        *[pl.col('action_time').filter(pl.col('name') == i).count().alias(f"{i}_time_count") for i in NAMES],
+        *[pl.col('action_time').filter(pl.col('name') == i).sum().alias(f"{i}_time_sum") for i in NAMES],
+        *[pl.col('action_time').filter(pl.col('name') == i).mean().alias(f"{i}_time_mean") for i in NAMES],
+        *[pl.col('action_time').filter(pl.col('name') == i).std().alias(f"{i}_time_std") for i in NAMES],
+        *[pl.col('action_time').filter(pl.col('name') == i).median().alias(f"{i}_time_median") for i in NAMES],
+        *[pl.col('action_time').filter(pl.col('name') == i).max().alias(f"{i}_time_max") for i in NAMES],
+
+        #Count and time per room_fqid
+        *[pl.col('action_time').filter(pl.col('room_fqid') == i).count().alias(f"{i}_time_count") for i in room_fqid_list],
+        *[pl.col('action_time').filter(pl.col('room_fqid') == i).sum().alias(f"{i}_time_sum") for i in room_fqid_list],
+        *[pl.col('action_time').filter(pl.col('room_fqid') == i).mean().alias(f"{i}_time_mean") for i in room_fqid_list],
+        *[pl.col('action_time').filter(pl.col('room_fqid') == i).std().alias(f"{i}_time_std") for i in room_fqid_list],
+        *[pl.col('action_time').filter(pl.col('room_fqid') == i).median().alias(f"{i}_time_median") for i in room_fqid_list],
+        *[pl.col('action_time').filter(pl.col('room_fqid') == i).max().alias(f"{i}_time_max") for i in room_fqid_list],
+
+        #Count and time per fqid
+        *[pl.col('action_time').filter(pl.col('fqid') == i).count().alias(f"{i}_time_count") for i in fqid_list],
+        *[pl.col('action_time').filter(pl.col('fqid') == i).sum().alias(f"{i}_time_sum") for i in fqid_list],
+        *[pl.col('action_time').filter(pl.col('fqid') == i).mean().alias(f"{i}_time_mean") for i in fqid_list],
+        *[pl.col('action_time').filter(pl.col('fqid') == i).std().alias(f"{i}_time_std") for i in fqid_list],
+        *[pl.col('action_time').filter(pl.col('fqid') == i).median().alias(f"{i}_time_median") for i in fqid_list],
+        *[pl.col('action_time').filter(pl.col('fqid') == i).max().alias(f"{i}_time_max") for i in fqid_list],
+
+        #Count and time per text_fqid
+        *[pl.col('action_time').filter(pl.col('text_fqid') == i).count().alias(f"{i}_time_count") for i in textfqid_list],
+        *[pl.col('action_time').filter(pl.col('text_fqid') == i).sum().alias(f"{i}_time_sum") for i in textfqid_list],
+        *[pl.col('action_time').filter(pl.col('text_fqid') == i).mean().alias(f"{i}_time_mean") for i in textfqid_list],
+        *[pl.col('action_time').filter(pl.col('text_fqid') == i).std().alias(f"{i}_time_std") for i in textfqid_list],
+        *[pl.col('action_time').filter(pl.col('text_fqid') == i).median().alias(f"{i}_time_median") for i in textfqid_list],
+        *[pl.col('action_time').filter(pl.col('text_fqid') == i).max().alias(f"{i}_time_max") for i in textfqid_list],
+
+        #Time per level
+        *[pl.col('action_time').filter(pl.col('level') == i).count().alias(f"action_timecount_{i}") for i in levels],
+        *[pl.col('action_time').filter(pl.col('level') == i).sum().alias(f"action_timesum_{i}") for i in levels],
+        *[pl.col('action_time').filter(pl.col('level') == i).mean().alias(f"action_timemean_{i}") for i in levels],
+        *[pl.col('action_time').filter(pl.col('level') == i).std().alias(f"action_timestd_{i}") for i in levels],
+        *[pl.col('action_time').filter(pl.col('level') == i).median().alias(f"action_timemedian_{i}") for i in levels],
+        *[pl.col('action_time').filter(pl.col('level') == i).max().alias(f"action_timemax_{i}") for i in levels],
+    ]
+
+    df = df.groupby(['session_id'], maintain_order=True).agg(aggs).sort('session_id')
+    df = df.with_columns((pl.col('total_elapsed_time') / pl.col('df_length')).alias('time_per_action')) #Average time per action
+    df = df.to_pandas()
+    
+    return df
     
     
-    # Count and time per text_fqid
-    if stage == 1:
-        textfqid_list = ['tunic.historicalsociety.closet.gramps.intro_0_cs_0', 'tunic.historicalsociety.closet.retirement_letter.hub', 'tunic.historicalsociety.closet.teddy.intro_0_cs_0',
-                         'tunic.historicalsociety.entry.groupconvo','tunic.kohlcenter.halloffame.plaque.face.date','tunic.kohlcenter.halloffame.togrampa']
-    elif stage == 2 :
-        textfqid_list = ['tunic.drycleaner.frontdesk.logbook.page.bingo', 'tunic.drycleaner.frontdesk.worker.done', 'tunic.drycleaner.frontdesk.worker.hub',
-                         'tunic.historicalsociety.closet_dirty.gramps.news', 'tunic.historicalsociety.closet_dirty.trigger_coffee', 'tunic.historicalsociety.closet_dirty.trigger_scarf',
-                         'tunic.historicalsociety.closet_dirty.what_happened', 'tunic.historicalsociety.frontdesk.archivist.have_glass', 'tunic.historicalsociety.frontdesk.archivist.hello',
-                         'tunic.historicalsociety.frontdesk.archivist.newspaper', 'tunic.historicalsociety.stacks.journals.pic_2.bingo', 'tunic.humanecology.frontdesk.worker.intro',
-                         'tunic.library.frontdesk.worker.hello']
-    elif stage == 3:
-        textfqid_list = ['tunic.flaghouse.entry.flag_girl.hello', 'tunic.flaghouse.entry.flag_girl.symbol', 'tunic.historicalsociety.basement.ch3start', 'tunic.historicalsociety.basement.savedteddy',
-                         'tunic.historicalsociety.basement.seescratches', 'tunic.historicalsociety.cage.confrontation', 'tunic.historicalsociety.cage.glasses.afterteddy',
-                         'tunic.historicalsociety.cage.teddy.trapped', 'tunic.historicalsociety.cage.unlockdoor', 'tunic.historicalsociety.collection_flag.gramps.flag',
-                         'tunic.historicalsociety.entry.boss.flag', 'tunic.historicalsociety.entry.directory.closeup.archivist', 'tunic.historicalsociety.entry.groupconvo_flag',
-                         'tunic.historicalsociety.entry.wells.flag', 'tunic.historicalsociety.frontdesk.archivist_glasses.confrontation', 'tunic.historicalsociety.stacks.journals_flag.pic_0.bingo',
-                         'tunic.library.frontdesk.worker.flag', 'tunic.library.frontdesk.worker.nelson']
-        
-    for textfqid in textfqid_list:
-        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].count()
-        tmp.name = textfqid + 'time_count'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].sum()
-        tmp.name = textfqid + 'time_sum'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].mean()
-        tmp.name = textfqid + 'time_mean'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].std()
-        tmp.name = textfqid + 'time_std'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].median()
-        tmp.name = textfqid + 'time_median'
-        dfs.append(tmp)
-        
-        tmp = df.loc[df['text_fqid'] == textfqid, :].groupby('session_id')['action_time'].max()
-        tmp.name = textfqid + 'time_max'
-        dfs.append(tmp)
-        
-    _train = pd.concat(dfs,axis=1).reset_index()
-    
-    
-    # Time per level - Sum, Mean, Median, Std, Max, Count
-    tmp = df.groupby(['session_id', 'level']).agg({'action_time' : ['sum', 'mean', 'median', 'std', 'max', 'count']}).reset_index()
-    tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns='level', values=['action_timesum', 'action_timemean', 'action_timemedian', 'action_timestd', 'action_timemax', 'action_timecount'])
-    tmp_pivot.columns = [i[0] + '_' + str(i[1]) for i in tmp_pivot.columns]
-    tmp_pivot = tmp_pivot.reset_index()
-    
-    if train == False:
-        if stage == 1:
-            level_range = range(0,5)
-        elif stage == 2:
-            level_range = range(5,13)
-        elif stage == 3:
-            level_range = range(13,23)
-            
-        NEEDED_COLS = ['session_id'] + ['action_timemax_' + str(i) for i in level_range] + ['action_timemean_' + str(i) for i in level_range] + ['action_timemedian_' + str(i) for i in level_range] +\
-        ['action_timestd_' + str(i) for i in level_range] + ['action_timesum_' + str(i) for i in level_range] + ['action_timecount_' + str(i) for i in level_range]
-        missing_cols = np.array(NEEDED_COLS[1:])[~np.isin(NEEDED_COLS[1:], tmp_pivot.columns)]
-        for _col in missing_cols:
-            tmp_pivot[_col] = 0
-        tmp_pivot = tmp_pivot[NEEDED_COLS]
-        
-    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
-    
-    
+def get_general_features_2(df, stage, train=True):    
     # Time per level and event
     COLS = []
     EVENT_AT_LEVEL_STG1 = {
@@ -323,9 +217,9 @@ def get_general_features(df, stage, train=True):
 
     tmp = df.groupby(['session_id', 'level', 'event_name']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']}).reset_index()
     tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'event_name'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax',
+    _train = tmp.pivot_table(index='session_id', columns=['level', 'event_name'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax',
                                                                                              'action_timecount'])
-    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
+    _train.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in _train.columns]
 
     if stage == 1:
         level_range = range(0,5)
@@ -347,16 +241,14 @@ def get_general_features(df, stage, train=True):
 
 
     if train == False:
-        missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
+        missing_cols = np.array(COLS)[~np.isin(COLS, _train.columns)]
         for _col in missing_cols:
-            tmp_pivot[_col] = 0
+            _train[_col] = 0
 
 
-    tmp_pivot = tmp_pivot[COLS]
-    tmp_pivot = tmp_pivot.reset_index()
-    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
-    
-    
+    _train = _train[COLS].reset_index()
+
+ 
     # Time per level and room
     COLS = []
     ROOM_AT_LEVEL_STG1 = {
@@ -436,7 +328,7 @@ def get_general_features(df, stage, train=True):
     tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
 
     if stage == 1:
-        cols_needed = ['0_basic', '0_undefined', '1_basic', '1_undefined', '2_basic', '2_undefined', '3_basic', '3_undefined', '4_basic', '4_open', '4_prev', '4_undefined']
+        cols_needed = ['0_basic', '0_undefined', '1_basic', '1_undefined', '2_basic', '2_undefined', '3_basic', '3_undefined', '4_basic', '4_undefined']
     elif stage == 2:
         cols_needed = ['5_basic', '5_undefined', '6_basic',  '6_undefined', '7_basic', '7_undefined', '8_basic',  '8_undefined', '9_basic',  '9_undefined', '10_basic', '10_undefined', '11_basic', 
                        '11_undefined', '12_basic', '12_open', '12_prev', '12_undefined']
