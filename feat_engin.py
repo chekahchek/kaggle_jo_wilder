@@ -7,64 +7,6 @@ def get_general_features_1(df, stage, train=True):
     
     EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
     NAMES = ['basic', 'close', 'open', 'undefined']
-    
-#     textfqid_list = ['tunic.historicalsociety.cage.confrontation', 'tunic.wildlife.center.crane_ranger.crane', 'tunic.historicalsociety.frontdesk.archivist.newspaper', 
-#                      'tunic.historicalsociety.entry.groupconvo', 'tunic.wildlife.center.wells.nodeer', 'tunic.historicalsociety.frontdesk.archivist.have_glass', 'tunic.drycleaner.frontdesk.worker.hub', 
-#                      'tunic.historicalsociety.closet_dirty.gramps.news', 'tunic.humanecology.frontdesk.worker.intro', 'tunic.historicalsociety.frontdesk.archivist_glasses.confrontation', 
-#                      'tunic.historicalsociety.basement.seescratches', 'tunic.historicalsociety.collection.cs', 'tunic.flaghouse.entry.flag_girl.hello', 'tunic.historicalsociety.collection.gramps.found', 
-#                      'tunic.historicalsociety.basement.ch3start', 'tunic.historicalsociety.entry.groupconvo_flag', 'tunic.library.frontdesk.worker.hello', 'tunic.library.frontdesk.worker.wells', 
-#                      'tunic.historicalsociety.collection_flag.gramps.flag', 'tunic.historicalsociety.basement.savedteddy', 'tunic.library.frontdesk.worker.nelson', 
-#                      'tunic.wildlife.center.expert.removed_cup', 'tunic.library.frontdesk.worker.flag', 'tunic.historicalsociety.frontdesk.archivist.hello', 
-#                      'tunic.historicalsociety.closet.gramps.intro_0_cs_0', 'tunic.historicalsociety.entry.boss.flag','tunic.flaghouse.entry.flag_girl.symbol',
-#                      'tunic.historicalsociety.closet_dirty.trigger_scarf', 'tunic.drycleaner.frontdesk.worker.done', 'tunic.historicalsociety.closet_dirty.what_happened', 
-#                      'tunic.wildlife.center.wells.animals', 'tunic.historicalsociety.closet.teddy.intro_0_cs_0', 'tunic.historicalsociety.cage.glasses.afterteddy',
-#                      'tunic.historicalsociety.cage.teddy.trapped', 'tunic.historicalsociety.cage.unlockdoor', 'tunic.historicalsociety.stacks.journals.pic_2.bingo',
-#                      'tunic.historicalsociety.entry.wells.flag', 'tunic.humanecology.frontdesk.worker.badger', 'tunic.historicalsociety.stacks.journals_flag.pic_0.bingo', 
-#                      'tunic.historicalsociety.closet.intro', 'tunic.historicalsociety.closet.retirement_letter.hub','tunic.historicalsociety.entry.directory.closeup.archivist',
-#                      'tunic.historicalsociety.collection.tunic.slip', 'tunic.kohlcenter.halloffame.plaque.face.date', 'tunic.historicalsociety.closet_dirty.trigger_coffee',
-#                      'tunic.drycleaner.frontdesk.logbook.page.bingo', 'tunic.library.microfiche.reader.paper2.bingo', 'tunic.kohlcenter.halloffame.togrampa', 'tunic.capitol_2.hall.boss.haveyougotit',
-#                      'tunic.wildlife.center.wells.nodeer_recap', 'tunic.historicalsociety.cage.glasses.beforeteddy','tunic.historicalsociety.closet_dirty.gramps.helpclean',
-#                      'tunic.wildlife.center.expert.recap', 'tunic.historicalsociety.frontdesk.archivist.have_glass_recap', 'tunic.historicalsociety.stacks.journals_flag.pic_1.bingo',
-#                      'tunic.historicalsociety.cage.lockeddoor', 'tunic.historicalsociety.stacks.journals_flag.pic_2.bingo', 'tunic.historicalsociety.collection.gramps.lost', 
-#                      'tunic.historicalsociety.closet.notebook', 'tunic.historicalsociety.frontdesk.magnify', 'tunic.humanecology.frontdesk.businesscards.card_bingo.bingo',
-#                      'tunic.wildlife.center.remove_cup', 'tunic.library.frontdesk.wellsbadge.hub', 'tunic.wildlife.center.tracks.hub.deer', 'tunic.historicalsociety.frontdesk.key',
-#                      'tunic.library.microfiche.reader_flag.paper2.bingo', 'tunic.flaghouse.entry.colorbook', 'tunic.wildlife.center.coffee', 
-#                      'tunic.capitol_1.hall.boss.haveyougotit', 'tunic.historicalsociety.basement.janitor', 'tunic.historicalsociety.collection_flag.gramps.recap', 'tunic.wildlife.center.wells.animals2',
-#                      'tunic.flaghouse.entry.flag_girl.symbol_recap', 'tunic.historicalsociety.closet_dirty.photo', 'tunic.historicalsociety.stacks.outtolunch',
-#                      'tunic.library.frontdesk.worker.wells_recap', 'tunic.historicalsociety.frontdesk.archivist_glasses.confrontation_recap', 'tunic.capitol_0.hall.boss.talktogramps',
-#                      'tunic.historicalsociety.closet.photo', 'tunic.historicalsociety.collection.tunic', 'tunic.historicalsociety.closet.teddy.intro_0_cs_5',
-#                      'tunic.historicalsociety.closet_dirty.gramps.archivist', 'tunic.historicalsociety.closet_dirty.door_block_talk', 'tunic.historicalsociety.entry.boss.flag_recap', 
-#                      'tunic.historicalsociety.frontdesk.archivist.need_glass_0', 'tunic.historicalsociety.entry.wells.talktogramps', 'tunic.historicalsociety.frontdesk.block_magnify',
-#                      'tunic.historicalsociety.frontdesk.archivist.foundtheodora', 'tunic.historicalsociety.closet_dirty.gramps.nothing', 'tunic.historicalsociety.closet_dirty.door_block_clean',
-#                      'tunic.capitol_1.hall.boss.writeitup', 'tunic.library.frontdesk.worker.nelson_recap', 'tunic.library.frontdesk.worker.hello_short', 'tunic.historicalsociety.stacks.block',
-#                      'tunic.historicalsociety.frontdesk.archivist.need_glass_1', 'tunic.historicalsociety.entry.boss.talktogramps', 'tunic.historicalsociety.frontdesk.archivist.newspaper_recap',
-#                      'tunic.historicalsociety.entry.wells.flag_recap', 'tunic.drycleaner.frontdesk.worker.done2', 'tunic.library.frontdesk.worker.flag_recap', 'tunic.humanecology.frontdesk.block_0',
-#                      'tunic.library.frontdesk.worker.preflag', 'tunic.historicalsociety.basement.gramps.seeyalater', 'tunic.flaghouse.entry.flag_girl.hello_recap',
-#                      'tunic.historicalsociety.closet.doorblock','tunic.drycleaner.frontdesk.worker.takealook','tunic.historicalsociety.basement.gramps.whatdo', 
-#                      'tunic.library.frontdesk.worker.droppedbadge', 'tunic.historicalsociety.entry.block_tomap2', 'tunic.library.frontdesk.block_nelson', 'tunic.library.microfiche.block_0',
-#                      'tunic.historicalsociety.entry.block_tocollection', 'tunic.historicalsociety.entry.block_tomap1', 'tunic.historicalsociety.collection.gramps.look_0',
-#                      'tunic.library.frontdesk.block_badge', 'tunic.historicalsociety.cage.need_glasses', 'tunic.library.frontdesk.block_badge_2', 'tunic.kohlcenter.halloffame.block_0', 
-#                      'tunic.capitol_0.hall.chap1_finale_c', 'tunic.capitol_1.hall.chap2_finale_c', 'tunic.capitol_2.hall.chap4_finale_c', 'tunic.wildlife.center.fox.concern',
-#                      'tunic.drycleaner.frontdesk.block_0', 'tunic.historicalsociety.entry.gramps.hub', 'tunic.humanecology.frontdesk.block_1', 'tunic.drycleaner.frontdesk.block_1']
-    
-#     room_fqid_list = ['tunic.historicalsociety.entry', 'tunic.wildlife.center', 'tunic.historicalsociety.cage', 'tunic.library.frontdesk', 'tunic.historicalsociety.frontdesk',
-#                       'tunic.historicalsociety.stacks', 'tunic.historicalsociety.closet_dirty', 'tunic.humanecology.frontdesk', 'tunic.historicalsociety.basement', 'tunic.kohlcenter.halloffame',
-#                       'tunic.library.microfiche', 'tunic.drycleaner.frontdesk', 'tunic.historicalsociety.collection', 'tunic.historicalsociety.closet', 'tunic.flaghouse.entry',
-#                       'tunic.historicalsociety.collection_flag', 'tunic.capitol_1.hall', 'tunic.capitol_0.hall', 'tunic.capitol_2.hall']
-    
-#     fqid_list = ['worker', 'archivist', 'gramps', 'wells', 'toentry', 'confrontation', 'crane_ranger', 'groupconvo', 'flag_girl', 'tomap', 'tostacks', 'tobasement', 'archivist_glasses', 'boss', 
-#                  'journals', 'seescratches', 'groupconvo_flag', 'cs', 'teddy', 'expert', 'businesscards', 'ch3start', 'tunic.historicalsociety', 'tofrontdesk', 'savedteddy', 'plaque', 'glasses', 
-#                  'tunic.drycleaner', 'reader_flag', 'tunic.library', 'tracks', 'tunic.capitol_2', 'trigger_scarf', 'reader', 'directory', 'tunic.capitol_1', 'journals.pic_0.next', 'unlockdoor', 'tunic', 
-#                  'what_happened', 'tunic.kohlcenter', 'tunic.humanecology', 'colorbook', 'logbook', 'businesscards.card_0.next', 'journals.hub.topics', 'logbook.page.bingo', 'journals.pic_1.next', 
-#                  'journals_flag', 'reader.paper0.next', 'tracks.hub.deer', 'reader_flag.paper0.next', 'trigger_coffee', 'wellsbadge', 'journals.pic_2.next', 'tomicrofiche', 'journals_flag.pic_0.bingo', 
-#                  'plaque.face.date', 'notebook', 'tocloset_dirty', 'businesscards.card_bingo.bingo', 'businesscards.card_1.next', 'tunic.wildlife', 'tunic.hub.slip', 'tocage', 'journals.pic_2.bingo', 
-#                  'tocollectionflag', 'tocollection', 'chap4_finale_c', 'chap2_finale_c', 'lockeddoor', 'journals_flag.hub.topics', 'tunic.capitol_0', 'reader_flag.paper2.bingo', 'photo', 
-#                  'tunic.flaghouse', 'reader.paper1.next', 'directory.closeup.archivist', 'intro', 'businesscards.card_bingo.next', 'reader.paper2.bingo', 'retirement_letter', 'remove_cup', 
-#                  'journals_flag.pic_0.next', 'magnify', 'coffee', 'key', 'togrampa', 'reader_flag.paper1.next', 'janitor', 'tohallway', 'chap1_finale', 'report', 'outtolunch', 
-#                  'journals_flag.hub.topics_old', 'journals_flag.pic_1.next', 'reader.paper2.next', 'chap1_finale_c', 'reader_flag.paper2.next', 'door_block_talk', 'journals_flag.pic_1.bingo', 
-#                  'journals_flag.pic_2.next', 'journals_flag.pic_2.bingo', 'block_magnify', 'reader.paper0.prev', 'block', 'reader_flag.paper0.prev', 'block_0', 'door_block_clean', 'reader.paper2.prev', 
-#                  'reader.paper1.prev', 'doorblock', 'tocloset', 'reader_flag.paper2.prev', 'reader_flag.paper1.prev', 'block_tomap2', 'journals_flag.pic_0_old.next', 'journals_flag.pic_1_old.next', 
-#                  'block_tocollection', 'block_nelson', 'journals_flag.pic_2_old.next', 'block_tomap1', 'block_badge', 'need_glasses', 'block_badge_2', 'fox', 'block_1']
 
     if stage == 1:
         levels = list(range(0,5))
@@ -245,10 +187,83 @@ def get_general_features_2(df, stage, train=True):
         for _col in missing_cols:
             _train[_col] = 0
 
-
     _train = _train[COLS].reset_index()
 
- 
+    
+     # Time per level and name
+    tmp = df.groupby(['session_id', 'level', 'name']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
+    tmp.columns = tmp.columns.map(''.join)
+    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'name'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 'action_timecount'])
+    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
+
+    if stage == 1:
+        cols_needed = ['0_basic', '0_undefined', '1_basic', '1_undefined', '2_basic', '2_undefined', '3_basic', '3_undefined', '4_basic', '4_undefined']
+    elif stage == 2:
+        cols_needed = ['5_basic', '5_undefined', '6_basic',  '6_undefined', '7_basic', '7_undefined', '8_basic',  '8_undefined', '9_basic',  '9_undefined', '10_basic', '10_undefined', '11_basic', 
+                       '11_undefined', '12_basic', '12_open', '12_prev', '12_undefined']
+    elif stage == 3:
+        cols_needed = ['13_basic', '13_undefined', '14_basic', '14_undefined', '15_basic', '15_undefined', '16_basic', '16_undefined', '17_basic', '17_undefined', '18_basic', '18_close', '18_undefined', 
+                       '19_basic', '19_close', '19_undefined', '20_basic', '20_undefined', '21_basic', '21_close', '21_undefined', '22_basic', '22_undefined']
+
+    COLS = []
+    COLS.extend([i + '_action_timesum' for i in cols_needed])
+    COLS.extend([i + '_action_timemean' for i in cols_needed])
+    COLS.extend([i + '_action_timestd' for i in cols_needed])
+    COLS.extend([i + '_action_timemedian' for i in cols_needed])
+    COLS.extend([i + '_action_timemax' for i in cols_needed])
+    COLS.extend([i + '_action_timecount' for i in cols_needed])
+
+    if train == False:
+        missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
+        for _col in missing_cols:
+            tmp_pivot[_col] = 0
+
+
+    tmp_pivot = tmp_pivot[COLS]
+    tmp_pivot = tmp_pivot.reset_index()
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+    
+    
+    # Time per level and fqid
+    tmp = df.groupby(['session_id', 'level', 'fqid']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
+    tmp.columns = tmp.columns.map(''.join)
+    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'fqid'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 'action_timecount'])
+    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
+
+    if stage == 1:
+        cols_needed = ['0_gramps', '0_notebook', '0_teddy', '1_groupconvo', '2_cs', '2_gramps', '2_tunic', '2_tunic.hub.slip', '3_plaque', '3_plaque.face.date', '3_toentry', '3_togrampa', '3_tomap', 
+                       '4_toentry']
+    elif stage == 2:
+        cols_needed = ['5_toentry', '5_what_happened', '6_archivist','6_gramps', '6_magnify', '6_trigger_coffee', '6_trigger_scarf', '7_businesscards', '7_businesscards.card_0.next', 
+                       '7_businesscards.card_1.next', '7_businesscards.card_bingo.bingo', '7_tomap', '7_worker', '8_logbook', '8_logbook.page.bingo', '8_worker', '9_reader', '9_reader.paper0.next', 
+                       '9_reader.paper1.next', '9_reader.paper2.bingo', '9_toentry', '9_worker', '10_wellsbadge', '10_worker', '11_archivist', '11_journals', '11_journals.hub.topics', 
+                       '11_journals.pic_0.next', '11_journals.pic_1.next', '11_journals.pic_2.bingo', '11_toentry', '11_tostacks', '12_chap2_finale_c', '12_tomap']
+    elif stage == 3:
+        cols_needed = ['13_ch3start', '13_seescratches', '13_toentry', '14_glasses', '14_lockeddoor', '14_teddy', '15_directory', '15_directory.closeup.archivist', '15_glasses', '15_key', 
+                       '16_confrontation', '16_unlockdoor', '17_gramps', '17_savedteddy', '18_boss', '18_coffee', '18_crane_ranger', '18_expert', '18_groupconvo_flag', '18_remove_cup', '18_tomap', 
+                       '18_tracks', '18_tracks.hub.deer', '18_wells', '19_colorbook', '19_flag_girl', '19_tomap', '20_reader_flag', '20_reader_flag.paper0.next', '20_reader_flag.paper2.bingo', 
+                       '20_tomap', '20_worker', '21_archivist_glasses', '21_journals_flag', '21_journals_flag.hub.topics', '21_journals_flag.pic_0.bingo', '21_journals_flag.pic_0.next', '21_toentry', 
+                       '21_tofrontdesk', '21_tostacks', '21_worker', '22_chap4_finale_c', '22_tomap']
+
+    COLS = []
+    COLS.extend([i + '_action_timesum' for i in cols_needed])
+    COLS.extend([i + '_action_timemean' for i in cols_needed])
+    COLS.extend([i + '_action_timestd' for i in cols_needed])
+    COLS.extend([i + '_action_timemedian' for i in cols_needed])
+    COLS.extend([i + '_action_timemax' for i in cols_needed])
+    COLS.extend([i + '_action_timecount' for i in cols_needed])
+
+    if train == False:
+        missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
+        for _col in missing_cols:
+            tmp_pivot[_col] = 0
+
+
+    tmp_pivot = tmp_pivot[COLS]
+    tmp_pivot = tmp_pivot.reset_index()
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+    
+    
     # Time per level and room
     COLS = []
     ROOM_AT_LEVEL_STG1 = {
@@ -320,39 +335,6 @@ def get_general_features_2(df, stage, train=True):
     tmp_pivot = tmp_pivot.reset_index()
     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
-    
-    # Time per level and name
-    tmp = df.groupby(['session_id', 'level', 'name']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
-    tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'name'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 'action_timecount'])
-    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
-
-    if stage == 1:
-        cols_needed = ['0_basic', '0_undefined', '1_basic', '1_undefined', '2_basic', '2_undefined', '3_basic', '3_undefined', '4_basic', '4_undefined']
-    elif stage == 2:
-        cols_needed = ['5_basic', '5_undefined', '6_basic',  '6_undefined', '7_basic', '7_undefined', '8_basic',  '8_undefined', '9_basic',  '9_undefined', '10_basic', '10_undefined', '11_basic', 
-                       '11_undefined', '12_basic', '12_open', '12_prev', '12_undefined']
-    elif stage == 3:
-        cols_needed = ['13_basic', '13_undefined', '14_basic', '14_undefined', '15_basic', '15_undefined', '16_basic', '16_undefined', '17_basic', '17_undefined', '18_basic', '18_close', '18_undefined', 
-                       '19_basic', '19_close', '19_undefined', '20_basic', '20_undefined', '21_basic', '21_close', '21_undefined', '22_basic', '22_undefined']
-
-    COLS = []
-    COLS.extend([i + '_action_timesum' for i in cols_needed])
-    COLS.extend([i + '_action_timemean' for i in cols_needed])
-    COLS.extend([i + '_action_timestd' for i in cols_needed])
-    COLS.extend([i + '_action_timemedian' for i in cols_needed])
-    COLS.extend([i + '_action_timemax' for i in cols_needed])
-    COLS.extend([i + '_action_timecount' for i in cols_needed])
-
-    if train == False:
-        missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
-        for _col in missing_cols:
-            tmp_pivot[_col] = 0
-
-
-    tmp_pivot = tmp_pivot[COLS]
-    tmp_pivot = tmp_pivot.reset_index()
-    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     return _train
     
