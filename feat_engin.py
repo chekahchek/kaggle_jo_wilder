@@ -336,6 +336,53 @@ def get_general_features_2(df, stage, train=True):
     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     
+    # Time per level and text_fqid
+    tmp = df.groupby(['session_id', 'level', 'text_fqid']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
+    tmp.columns = tmp.columns.map(''.join)
+    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'text_fqid'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 
+                                                                                            'action_timecount'])
+    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
+
+    if stage == 1:
+        cols_needed = ['0_tunic.historicalsociety.closet.gramps.intro_0_cs_0', '0_tunic.historicalsociety.closet.teddy.intro_0_cs_0', '1_tunic.historicalsociety.entry.groupconvo', 
+                       '2_tunic.historicalsociety.collection.cs', '2_tunic.historicalsociety.collection.gramps.found', '2_tunic.historicalsociety.collection.tunic.slip', 
+                       '3_tunic.kohlcenter.halloffame.plaque.face.date', '3_tunic.kohlcenter.halloffame.togrampa']
+
+    elif stage == 2:
+        cols_needed = ['5_tunic.historicalsociety.closet_dirty.what_happened', '6_tunic.historicalsociety.closet_dirty.gramps.news', '6_tunic.historicalsociety.closet_dirty.trigger_coffee', 
+                       '6_tunic.historicalsociety.closet_dirty.trigger_scarf', '6_tunic.historicalsociety.frontdesk.archivist.have_glass', '6_tunic.historicalsociety.frontdesk.archivist.hello', 
+                       '7_tunic.humanecology.frontdesk.worker.intro', '8_tunic.drycleaner.frontdesk.logbook.page.bingo', '8_tunic.drycleaner.frontdesk.worker.hub', 
+                       '9_tunic.drycleaner.frontdesk.worker.done', '9_tunic.library.frontdesk.worker.hello', '9_tunic.library.microfiche.reader.paper2.bingo', '10_tunic.library.frontdesk.worker.wells', 
+                       '11_tunic.historicalsociety.frontdesk.archivist.newspaper', '11_tunic.historicalsociety.stacks.journals.pic_2.bingo']
+
+    elif stage == 3:
+        cols_needed = ['13_tunic.historicalsociety.basement.ch3start', '13_tunic.historicalsociety.basement.seescratches', '14_tunic.historicalsociety.cage.teddy.trapped', 
+                       '15_tunic.historicalsociety.cage.glasses.afterteddy', '15_tunic.historicalsociety.entry.directory.closeup.archivist', '16_tunic.historicalsociety.cage.confrontation', 
+                       '16_tunic.historicalsociety.cage.unlockdoor', '17_tunic.historicalsociety.basement.savedteddy', '17_tunic.historicalsociety.collection_flag.gramps.flag', 
+                       '18_tunic.historicalsociety.entry.boss.flag', '18_tunic.historicalsociety.entry.groupconvo_flag', '18_tunic.historicalsociety.entry.wells.flag', 
+                       '18_tunic.wildlife.center.crane_ranger.crane', '18_tunic.wildlife.center.expert.removed_cup', '18_tunic.wildlife.center.wells.animals', '18_tunic.wildlife.center.wells.nodeer', 
+                       '19_tunic.flaghouse.entry.flag_girl.hello', '19_tunic.flaghouse.entry.flag_girl.symbol', '20_tunic.library.frontdesk.worker.flag', 
+                       '21_tunic.historicalsociety.frontdesk.archivist_glasses.confrontation', '21_tunic.historicalsociety.stacks.journals_flag.pic_0.bingo', '21_tunic.library.frontdesk.worker.nelson']
+        
+    COLS = []
+    COLS.extend([i + '_action_timesum' for i in cols_needed])
+    COLS.extend([i + '_action_timemean' for i in cols_needed])
+    COLS.extend([i + '_action_timestd' for i in cols_needed])
+    COLS.extend([i + '_action_timemedian' for i in cols_needed])
+    COLS.extend([i + '_action_timemax' for i in cols_needed])
+    COLS.extend([i + '_action_timecount' for i in cols_needed])
+
+    if train == False:
+        missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
+        for _col in missing_cols:
+            tmp_pivot[_col] = 0
+
+
+    tmp_pivot = tmp_pivot[COLS]
+    tmp_pivot = tmp_pivot.reset_index()
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+    
+    
     return _train
     
 
