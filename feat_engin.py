@@ -112,6 +112,27 @@ def get_general_features_1(df, stage, train=True):
         *[pl.col('action_time').filter(pl.col('level') == i).std().alias(f"action_timestd_{i}") for i in levels],
         *[pl.col('action_time').filter(pl.col('level') == i).median().alias(f"action_timemedian_{i}") for i in levels],
         *[pl.col('action_time').filter(pl.col('level') == i).max().alias(f"action_timemax_{i}") for i in levels],
+        
+        
+        #Movment X 
+        pl.col('movement_x').max().alias('max_movement_x'),
+        pl.col('movement_x').mean().alias('mean_movement_x'),
+        pl.col('movement_x').std().alias('std_movement_x'),
+        
+        #Movement Y
+        pl.col('movement_y').max().alias('max_movement_y'),
+        pl.col('movement_y').mean().alias('mean_movement_y'),
+        pl.col('movement_y').std().alias('std_movement_y'),
+        
+        #Movement per each event name
+        *[pl.col('movement_x').filter(pl.col('event_name') == i).sum().alias(f"{i}_movement_x_sum") for i in EVENT_NAMES],
+        *[pl.col('movement_x').filter(pl.col('event_name') == i).mean().alias(f"{i}_movement_x_mean") for i in EVENT_NAMES],
+        *[pl.col('movement_x').filter(pl.col('event_name') == i).std().alias(f"{i}_movement_x_std") for i in EVENT_NAMES],
+        
+        *[pl.col('movement_y').filter(pl.col('event_name') == i).sum().alias(f"{i}_movement_y_sum") for i in EVENT_NAMES],
+        *[pl.col('movement_y').filter(pl.col('event_name') == i).mean().alias(f"{i}_movement_y_mean") for i in EVENT_NAMES],
+        *[pl.col('movement_y').filter(pl.col('event_name') == i).std().alias(f"{i}_movement_y_std") for i in EVENT_NAMES],
+        
     ]
 
     df = df.groupby(['session_id'], maintain_order=True).agg(aggs).sort('session_id')
