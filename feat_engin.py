@@ -244,7 +244,8 @@ def get_general_features_2(df, stage, train=True):
                        '18_tracks', '18_tracks.hub.deer', '18_wells', '19_colorbook', '19_flag_girl', '19_tomap', '20_reader_flag', '20_reader_flag.paper0.next', '20_reader_flag.paper2.bingo', 
                        '20_tomap', '20_worker', '21_archivist_glasses', '21_journals_flag', '21_journals_flag.hub.topics', '21_journals_flag.pic_0.bingo', '21_journals_flag.pic_0.next', '21_toentry', 
                        '21_tofrontdesk', '21_tostacks', '21_worker', '22_chap4_finale_c', '22_tomap']
-
+    
+    if stage != 2:
         COLS = []
         COLS.extend([i + '_action_timesum' for i in cols_needed])
         COLS.extend([i + '_action_timemean' for i in cols_needed])
