@@ -29,10 +29,11 @@ def get_general_features_1(df, stage, train=True):
     elif stage == 3:
         levels = list(range(13,23))
         room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
-        fqid_list = ['archivist_glasses', 'boss', 'ch3start', 'chap4_finale_c', 'coffee', 'colorbook', 'confrontation', 'crane_ranger', 'directory', 'directory.closeup.archivist', 'expert', 'flag_girl',
-                     'glasses', 'gramps', 'groupconvo_flag', 'journals_flag', 'journals_flag.hub.topics', 'journals_flag.pic_0.bingo', 'journals_flag.pic_0.next', 'key', 'lockeddoor', 'reader_flag',
-                     'reader_flag.paper0.next', 'reader_flag.paper2.bingo', 'remove_cup', 'savedteddy', 'seescratches', 'teddy', 'tobasement', 'tocage', 'toentry', 'tofrontdesk', 'tomap', 'tostacks',
-                     'tracks', 'tracks.hub.deer', 'tunic.capitol_2', 'tunic.drycleaner', 'tunic.flaghouse', 'tunic.historicalsociety', 'tunic.library', 'tunic.wildlife', 'unlockdoor']
+        fqid_list = []
+        # fqid_list = ['archivist_glasses', 'boss', 'ch3start', 'chap4_finale_c', 'coffee', 'colorbook', 'confrontation', 'crane_ranger', 'directory', 'directory.closeup.archivist', 'expert', 'flag_girl',
+        #              'glasses', 'gramps', 'groupconvo_flag', 'journals_flag', 'journals_flag.hub.topics', 'journals_flag.pic_0.bingo', 'journals_flag.pic_0.next', 'key', 'lockeddoor', 'reader_flag',
+        #              'reader_flag.paper0.next', 'reader_flag.paper2.bingo', 'remove_cup', 'savedteddy', 'seescratches', 'teddy', 'tobasement', 'tocage', 'toentry', 'tofrontdesk', 'tomap', 'tostacks',
+        #              'tracks', 'tracks.hub.deer', 'tunic.capitol_2', 'tunic.drycleaner', 'tunic.flaghouse', 'tunic.historicalsociety', 'tunic.library', 'tunic.wildlife', 'unlockdoor']
         textfqid_list = ['tunic.flaghouse.entry.flag_girl.hello', 'tunic.flaghouse.entry.flag_girl.symbol', 'tunic.historicalsociety.basement.ch3start', 'tunic.historicalsociety.basement.savedteddy',
                          'tunic.historicalsociety.basement.seescratches', 'tunic.historicalsociety.cage.confrontation', 'tunic.historicalsociety.cage.glasses.afterteddy',
                          'tunic.historicalsociety.cage.teddy.trapped', 'tunic.historicalsociety.cage.unlockdoor', 'tunic.historicalsociety.collection_flag.gramps.flag',
@@ -300,42 +301,42 @@ def get_general_features_2(df, stage, train=True):
         }
 
 
+    if stage == 1 or stage == 2:
+        tmp = df.groupby(['session_id', 'level', 'room_fqid']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
+        tmp.columns = tmp.columns.map(''.join)
+        tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'room_fqid'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 
+                                                                                                'action_timecount'])
+        tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
 
-    tmp = df.groupby(['session_id', 'level', 'room_fqid']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
-    tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'room_fqid'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 
-                                                                                            'action_timecount'])
-    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
+        if stage == 1:
+            level_range = range(0,5)
+            ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG1
+        elif stage == 2:
+            level_range = range(5,13)
+            ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG2
+        else:
+            level_range = range(13,23)
+            ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG3
 
-    if stage == 1:
-        level_range = range(0,5)
-        ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG1
-    elif stage == 2:
-        level_range = range(5,13)
-        ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG2
-    else:
-        level_range = range(13,23)
-        ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG3
-
-    for level, cols in zip(list(level_range), ROOM_AT_LEVEL.values()):
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timesum' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timemean' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timestd' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timemedian' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timemax' for i in cols])
-        COLS.extend([str(level) + '_' + i + '_' + 'action_timecount' for i in cols])
-
-
-    if train == False:
-        missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
-        for _col in missing_cols:
-            tmp_pivot[_col] = 0
+        for level, cols in zip(list(level_range), ROOM_AT_LEVEL.values()):
+            COLS.extend([str(level) + '_' + i + '_' + 'action_timesum' for i in cols])
+            COLS.extend([str(level) + '_' + i + '_' + 'action_timemean' for i in cols])
+            COLS.extend([str(level) + '_' + i + '_' + 'action_timestd' for i in cols])
+            COLS.extend([str(level) + '_' + i + '_' + 'action_timemedian' for i in cols])
+            COLS.extend([str(level) + '_' + i + '_' + 'action_timemax' for i in cols])
+            COLS.extend([str(level) + '_' + i + '_' + 'action_timecount' for i in cols])
 
 
-    tmp_pivot = tmp_pivot[COLS]
-    tmp_pivot = tmp_pivot.reset_index()
-    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
-    
+        if train == False:
+            missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
+            for _col in missing_cols:
+                tmp_pivot[_col] = 0
+
+
+        tmp_pivot = tmp_pivot[COLS]
+        tmp_pivot = tmp_pivot.reset_index()
+        _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+
     
     return _train
     
