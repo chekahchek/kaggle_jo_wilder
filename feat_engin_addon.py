@@ -155,3 +155,23 @@ def get_addon_feat_polars(df, stage, train=False):
     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     return _train
+
+
+def get_answer_time_1_polars(df, train=True):
+    df['relevant'] = (df['event_name'] == 'checkpoint')
+    df['relevant2'] = df['relevant'].shift(-1)
+    df['keep'] = df['relevant'] | df['relevant2']
+    
+    if train == False and sum(df['keep']) < 2:
+        df = df.iloc[-2:, :]
+    else:
+        df = df.loc[df['keep'], :]
+
+    if train:
+        df = df.groupby('session_id')[['session_id', 'elapsed_time']].head(1).reset_index(drop=True)
+    else:
+        df = df[['action_time']].head(1).reset_index(drop=True)
+        
+    df['elapsed_time'] = df['elapsed_time'].clip(upper=50000) 
+    df = df.rename(columns={'elapsed_time' : 'answer_time_1'})
+    return df
