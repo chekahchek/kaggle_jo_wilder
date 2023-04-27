@@ -168,10 +168,10 @@ def get_answer_time_1_polars(df, train=True):
         df = df.loc[df['keep'], :]
 
     if train:
-        df = df.groupby('session_id')[['session_id', 'elapsed_time']].head(1).reset_index(drop=True)
+        df = df.groupby('session_id')[['session_id', 'elapsed_time_diff']].head(1).reset_index(drop=True)
     else:
-        df = df[['action_time']].head(1).reset_index(drop=True)
+        df = df[['elapsed_time_diff']].head(1).reset_index(drop=True)
         
-    df['elapsed_time'] = df['elapsed_time'].clip(upper=50000) 
-    df = df.rename(columns={'elapsed_time' : 'answer_time_1'})
+    df['elapsed_time_diff'] = df['elapsed_time_diff'].clip(upper=50000) 
+    df = df.rename(columns={'elapsed_time_diff' : 'answer_time_1'})
     return df
