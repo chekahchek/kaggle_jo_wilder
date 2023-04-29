@@ -239,14 +239,14 @@ def get_general_features_2(df, stage, train=True):
     #                    '7_businesscards.card_1.next', '7_businesscards.card_bingo.bingo', '7_tomap', '7_worker', '8_logbook', '8_logbook.page.bingo', '8_worker', '9_reader', '9_reader.paper0.next', 
     #                    '9_reader.paper1.next', '9_reader.paper2.bingo', '9_toentry', '9_worker', '10_wellsbadge', '10_worker', '11_archivist', '11_journals', '11_journals.hub.topics', 
     #                    '11_journals.pic_0.next', '11_journals.pic_1.next', '11_journals.pic_2.bingo', '11_toentry', '11_tostacks', '12_chap2_finale_c', '12_tomap']
-    elif stage == 3:
-        cols_needed = ['13_ch3start', '13_seescratches', '13_toentry', '14_glasses', '14_lockeddoor', '14_teddy', '15_directory', '15_directory.closeup.archivist', '15_glasses', '15_key', 
-                       '16_confrontation', '16_unlockdoor', '17_gramps', '17_savedteddy', '18_boss', '18_coffee', '18_crane_ranger', '18_expert', '18_groupconvo_flag', '18_remove_cup', '18_tomap', 
-                       '18_tracks', '18_tracks.hub.deer', '18_wells', '19_colorbook', '19_flag_girl', '19_tomap', '20_reader_flag', '20_reader_flag.paper0.next', '20_reader_flag.paper2.bingo', 
-                       '20_tomap', '20_worker', '21_archivist_glasses', '21_journals_flag', '21_journals_flag.hub.topics', '21_journals_flag.pic_0.bingo', '21_journals_flag.pic_0.next', '21_toentry', 
-                       '21_tofrontdesk', '21_tostacks', '21_worker', '22_chap4_finale_c', '22_tomap']
+    # elif stage == 3:
+    #     cols_needed = ['13_ch3start', '13_seescratches', '13_toentry', '14_glasses', '14_lockeddoor', '14_teddy', '15_directory', '15_directory.closeup.archivist', '15_glasses', '15_key', 
+    #                    '16_confrontation', '16_unlockdoor', '17_gramps', '17_savedteddy', '18_boss', '18_coffee', '18_crane_ranger', '18_expert', '18_groupconvo_flag', '18_remove_cup', '18_tomap', 
+    #                    '18_tracks', '18_tracks.hub.deer', '18_wells', '19_colorbook', '19_flag_girl', '19_tomap', '20_reader_flag', '20_reader_flag.paper0.next', '20_reader_flag.paper2.bingo', 
+    #                    '20_tomap', '20_worker', '21_archivist_glasses', '21_journals_flag', '21_journals_flag.hub.topics', '21_journals_flag.pic_0.bingo', '21_journals_flag.pic_0.next', '21_toentry', 
+    #                    '21_tofrontdesk', '21_tostacks', '21_worker', '22_chap4_finale_c', '22_tomap']
     
-    if stage != 2:
+    if stage == 1:
         COLS = []
         COLS.extend([i + '_action_timesum' for i in cols_needed])
         COLS.extend([i + '_action_timemean' for i in cols_needed])
