@@ -224,48 +224,7 @@ def get_general_features_2(df, stage, train=True):
         tmp_pivot = tmp_pivot[COLS]
         tmp_pivot = tmp_pivot.reset_index()
         _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
-    
-    
-    # Time per level and fqid
-    tmp = df.groupby(['session_id', 'level', 'fqid']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
-    tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'fqid'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 'action_timecount'])
-    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
-
-    if stage == 1:
-        cols_needed = ['0_gramps', '0_notebook', '0_teddy', '1_groupconvo', '2_cs', '2_gramps', '2_tunic', '2_tunic.hub.slip', '3_plaque', '3_plaque.face.date', '3_toentry', '3_togrampa', '3_tomap', 
-                       '4_toentry']
-    # elif stage == 2:
-    #     cols_needed = ['5_toentry', '5_what_happened', '6_archivist','6_gramps', '6_magnify', '6_trigger_coffee', '6_trigger_scarf', '7_businesscards', '7_businesscards.card_0.next', 
-    #                    '7_businesscards.card_1.next', '7_businesscards.card_bingo.bingo', '7_tomap', '7_worker', '8_logbook', '8_logbook.page.bingo', '8_worker', '9_reader', '9_reader.paper0.next', 
-    #                    '9_reader.paper1.next', '9_reader.paper2.bingo', '9_toentry', '9_worker', '10_wellsbadge', '10_worker', '11_archivist', '11_journals', '11_journals.hub.topics', 
-    #                    '11_journals.pic_0.next', '11_journals.pic_1.next', '11_journals.pic_2.bingo', '11_toentry', '11_tostacks', '12_chap2_finale_c', '12_tomap']
-    # elif stage == 3:
-    #     cols_needed = ['13_ch3start', '13_seescratches', '13_toentry', '14_glasses', '14_lockeddoor', '14_teddy', '15_directory', '15_directory.closeup.archivist', '15_glasses', '15_key', 
-    #                    '16_confrontation', '16_unlockdoor', '17_gramps', '17_savedteddy', '18_boss', '18_coffee', '18_crane_ranger', '18_expert', '18_groupconvo_flag', '18_remove_cup', '18_tomap', 
-    #                    '18_tracks', '18_tracks.hub.deer', '18_wells', '19_colorbook', '19_flag_girl', '19_tomap', '20_reader_flag', '20_reader_flag.paper0.next', '20_reader_flag.paper2.bingo', 
-    #                    '20_tomap', '20_worker', '21_archivist_glasses', '21_journals_flag', '21_journals_flag.hub.topics', '21_journals_flag.pic_0.bingo', '21_journals_flag.pic_0.next', '21_toentry', 
-    #                    '21_tofrontdesk', '21_tostacks', '21_worker', '22_chap4_finale_c', '22_tomap']
-    
-    if stage == 1:
-        COLS = []
-        COLS.extend([i + '_action_timesum' for i in cols_needed])
-        COLS.extend([i + '_action_timemean' for i in cols_needed])
-        COLS.extend([i + '_action_timestd' for i in cols_needed])
-        COLS.extend([i + '_action_timemedian' for i in cols_needed])
-        COLS.extend([i + '_action_timemax' for i in cols_needed])
-        COLS.extend([i + '_action_timecount' for i in cols_needed])
-
-        if train == False:
-            missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
-            for _col in missing_cols:
-                tmp_pivot[_col] = 0
-
-
-        tmp_pivot = tmp_pivot[COLS]
-        tmp_pivot = tmp_pivot.reset_index()
-        _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
-    
+        
     
     # Time per level and room
     COLS = []
