@@ -7,7 +7,7 @@ def get_general_features_1(df, stage, train=True):
     
     EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
     NAMES = ['basic', 'close', 'open', 'undefined']
-
+    
     if stage == 1:
         levels = list(range(0,5))
         room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
@@ -28,8 +28,7 @@ def get_general_features_1(df, stage, train=True):
                          'tunic.library.frontdesk.worker.hello']
     elif stage == 3:
         levels = list(range(13,23))
-        room_fqid_list = []
-        # room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
+        room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
         fqid_list = ['archivist_glasses', 'boss', 'ch3start', 'chap4_finale_c', 'coffee', 'colorbook', 'confrontation', 'crane_ranger', 'directory', 'directory.closeup.archivist', 'expert', 'flag_girl',
                      'glasses', 'gramps', 'groupconvo_flag', 'journals_flag', 'journals_flag.hub.topics', 'journals_flag.pic_0.bingo', 'journals_flag.pic_0.next', 'key', 'lockeddoor', 'reader_flag',
                      'reader_flag.paper0.next', 'reader_flag.paper2.bingo', 'remove_cup', 'savedteddy', 'seescratches', 'teddy', 'tobasement', 'tocage', 'toentry', 'tofrontdesk', 'tomap', 'tostacks',
@@ -188,44 +187,10 @@ def get_general_features_2(df, stage, train=True):
         for _col in missing_cols:
             _train[_col] = 0
 
+
     _train = _train[COLS].reset_index()
 
-    
-     # Time per level and name
-    tmp = df.groupby(['session_id', 'level', 'name']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
-    tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'name'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 'action_timecount'])
-    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
-
-    if stage == 1:
-        cols_needed = ['0_basic', '0_undefined', '1_basic', '1_undefined', '2_basic', '2_undefined', '3_basic', '3_undefined', '4_basic', '4_undefined']
-    # elif stage == 2:
-    #     cols_needed = ['5_basic', '5_undefined', '6_basic',  '6_undefined', '7_basic', '7_undefined', '8_basic',  '8_undefined', '9_basic',  '9_undefined', '10_basic', '10_undefined', '11_basic', 
-    #                    '11_undefined', '12_basic', '12_open', '12_prev', '12_undefined']
-    elif stage == 3:
-        cols_needed = ['13_basic', '13_undefined', '14_basic', '14_undefined', '15_basic', '15_undefined', '16_basic', '16_undefined', '17_basic', '17_undefined', '18_basic', '18_close', '18_undefined', 
-                       '19_basic', '19_close', '19_undefined', '20_basic', '20_undefined', '21_basic', '21_close', '21_undefined', '22_basic', '22_undefined']
-
-    if stage != 2:
-        COLS = []
-        COLS.extend([i + '_action_timesum' for i in cols_needed])
-        COLS.extend([i + '_action_timemean' for i in cols_needed])
-        COLS.extend([i + '_action_timestd' for i in cols_needed])
-        COLS.extend([i + '_action_timemedian' for i in cols_needed])
-        COLS.extend([i + '_action_timemax' for i in cols_needed])
-        COLS.extend([i + '_action_timecount' for i in cols_needed])
-
-        if train == False:
-            missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
-            for _col in missing_cols:
-                tmp_pivot[_col] = 0
-
-
-        tmp_pivot = tmp_pivot[COLS]
-        tmp_pivot = tmp_pivot.reset_index()
-        _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
-        
-    
+ 
     # Time per level and room
     COLS = []
     ROOM_AT_LEVEL_STG1 = {
@@ -261,31 +226,65 @@ def get_general_features_2(df, stage, train=True):
         }
 
 
-    if stage == 1 or stage == 2:
-        tmp = df.groupby(['session_id', 'level', 'room_fqid']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
-        tmp.columns = tmp.columns.map(''.join)
-        tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'room_fqid'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 
-                                                                                                'action_timecount'])
-        tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
 
-        if stage == 1:
-            level_range = range(0,5)
-            ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG1
-        elif stage == 2:
-            level_range = range(5,13)
-            ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG2
-        else:
-            level_range = range(13,23)
-            ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG3
+    tmp = df.groupby(['session_id', 'level', 'room_fqid']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
+    tmp.columns = tmp.columns.map(''.join)
+    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'room_fqid'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 
+                                                                                            'action_timecount'])
+    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
 
-        for level, cols in zip(list(level_range), ROOM_AT_LEVEL.values()):
-            COLS.extend([str(level) + '_' + i + '_' + 'action_timesum' for i in cols])
-            COLS.extend([str(level) + '_' + i + '_' + 'action_timemean' for i in cols])
-            COLS.extend([str(level) + '_' + i + '_' + 'action_timestd' for i in cols])
-            COLS.extend([str(level) + '_' + i + '_' + 'action_timemedian' for i in cols])
-            COLS.extend([str(level) + '_' + i + '_' + 'action_timemax' for i in cols])
-            COLS.extend([str(level) + '_' + i + '_' + 'action_timecount' for i in cols])
+    if stage == 1:
+        level_range = range(0,5)
+        ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG1
+    elif stage == 2:
+        level_range = range(5,13)
+        ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG2
+    else:
+        level_range = range(13,23)
+        ROOM_AT_LEVEL = ROOM_AT_LEVEL_STG3
 
+    for level, cols in zip(list(level_range), ROOM_AT_LEVEL.values()):
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timesum' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timemean' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timestd' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timemedian' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timemax' for i in cols])
+        COLS.extend([str(level) + '_' + i + '_' + 'action_timecount' for i in cols])
+
+
+    if train == False:
+        missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
+        for _col in missing_cols:
+            tmp_pivot[_col] = 0
+
+
+    tmp_pivot = tmp_pivot[COLS]
+    tmp_pivot = tmp_pivot.reset_index()
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+    
+    
+    # Time per level and name
+    tmp = df.groupby(['session_id', 'level', 'name']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
+    tmp.columns = tmp.columns.map(''.join)
+    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'name'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 'action_timecount'])
+    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
+
+    if stage == 1:
+        cols_needed = ['0_basic', '0_undefined', '1_basic', '1_undefined', '2_basic', '2_undefined', '3_basic', '3_undefined', '4_basic', '4_undefined']
+    # elif stage == 2:
+    #     cols_needed = ['5_basic', '5_undefined', '6_basic',  '6_undefined', '7_basic', '7_undefined', '8_basic',  '8_undefined', '9_basic',  '9_undefined', '10_basic', '10_undefined', '11_basic', 
+    #                    '11_undefined', '12_basic', '12_open', '12_prev', '12_undefined']
+    # elif stage == 3:
+    #     cols_needed = ['13_basic', '13_undefined', '14_basic', '14_undefined', '15_basic', '15_undefined', '16_basic', '16_undefined', '17_basic', '17_undefined', '18_basic', '18_close', '18_undefined', 
+    #                    '19_basic', '19_close', '19_undefined', '20_basic', '20_undefined', '21_basic', '21_close', '21_undefined', '22_basic', '22_undefined']
+    if stage == 1:
+        COLS = []
+        COLS.extend([i + '_action_timesum' for i in cols_needed])
+        COLS.extend([i + '_action_timemean' for i in cols_needed])
+        COLS.extend([i + '_action_timestd' for i in cols_needed])
+        COLS.extend([i + '_action_timemedian' for i in cols_needed])
+        COLS.extend([i + '_action_timemax' for i in cols_needed])
+        COLS.extend([i + '_action_timecount' for i in cols_needed])
 
         if train == False:
             missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
@@ -296,7 +295,6 @@ def get_general_features_2(df, stage, train=True):
         tmp_pivot = tmp_pivot[COLS]
         tmp_pivot = tmp_pivot.reset_index()
         _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
-
     
     return _train
     
