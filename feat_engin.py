@@ -7,7 +7,7 @@ def get_general_features_1(df, stage, train=True):
     
     EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click', 'map_hover','notification_click','map_click','observation_click']
     NAMES = ['basic', 'close', 'open', 'undefined']
-    
+
     if stage == 1:
         levels = list(range(0,5))
         room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
@@ -271,30 +271,30 @@ def get_general_features_2(df, stage, train=True):
 
     if stage == 1:
         cols_needed = ['0_basic', '0_undefined', '1_basic', '1_undefined', '2_basic', '2_undefined', '3_basic', '3_undefined', '4_basic', '4_undefined']
-    # elif stage == 2:
-    #     cols_needed = ['5_basic', '5_undefined', '6_basic',  '6_undefined', '7_basic', '7_undefined', '8_basic',  '8_undefined', '9_basic',  '9_undefined', '10_basic', '10_undefined', '11_basic', 
-    #                    '11_undefined', '12_basic', '12_open', '12_prev', '12_undefined']
-    # elif stage == 3:
-    #     cols_needed = ['13_basic', '13_undefined', '14_basic', '14_undefined', '15_basic', '15_undefined', '16_basic', '16_undefined', '17_basic', '17_undefined', '18_basic', '18_close', '18_undefined', 
-    #                    '19_basic', '19_close', '19_undefined', '20_basic', '20_undefined', '21_basic', '21_close', '21_undefined', '22_basic', '22_undefined']
-    if stage == 1:
-        COLS = []
-        COLS.extend([i + '_action_timesum' for i in cols_needed])
-        COLS.extend([i + '_action_timemean' for i in cols_needed])
-        COLS.extend([i + '_action_timestd' for i in cols_needed])
-        COLS.extend([i + '_action_timemedian' for i in cols_needed])
-        COLS.extend([i + '_action_timemax' for i in cols_needed])
-        COLS.extend([i + '_action_timecount' for i in cols_needed])
+    elif stage == 2:
+        cols_needed = ['5_basic', '5_undefined', '6_basic',  '6_undefined', '7_basic', '7_undefined', '8_basic',  '8_undefined', '9_basic',  '9_undefined', '10_basic', '10_undefined', '11_basic', 
+                       '11_undefined', '12_basic', '12_open', '12_prev', '12_undefined']
+    elif stage == 3:
+        cols_needed = ['13_basic', '13_undefined', '14_basic', '14_undefined', '15_basic', '15_undefined', '16_basic', '16_undefined', '17_basic', '17_undefined', '18_basic', '18_close', '18_undefined', 
+                       '19_basic', '19_close', '19_undefined', '20_basic', '20_undefined', '21_basic', '21_close', '21_undefined', '22_basic', '22_undefined']
 
-        if train == False:
-            missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
-            for _col in missing_cols:
-                tmp_pivot[_col] = 0
+    COLS = []
+    COLS.extend([i + '_action_timesum' for i in cols_needed])
+    COLS.extend([i + '_action_timemean' for i in cols_needed])
+    COLS.extend([i + '_action_timestd' for i in cols_needed])
+    COLS.extend([i + '_action_timemedian' for i in cols_needed])
+    COLS.extend([i + '_action_timemax' for i in cols_needed])
+    COLS.extend([i + '_action_timecount' for i in cols_needed])
+
+    if train == False:
+        missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
+        for _col in missing_cols:
+            tmp_pivot[_col] = 0
 
 
-        tmp_pivot = tmp_pivot[COLS]
-        tmp_pivot = tmp_pivot.reset_index()
-        _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
+    tmp_pivot = tmp_pivot[COLS]
+    tmp_pivot = tmp_pivot.reset_index()
+    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     return _train
     
