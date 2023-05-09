@@ -398,6 +398,25 @@ def get_general_features_2(df, stage, train=True):
     
     return _train
 
+def get_answer_time_1(df, train=True):
+    df['relevant'] = (df['event_name'] == 'checkpoint')
+    df['relevant2'] = df['relevant'].shift(-1)
+    df['keep'] = df['relevant'] | df['relevant2']
+    
+    if train == False and sum(df['keep']) < 2:
+        df = df.iloc[-2:, :]
+    else:
+        df = df.loc[df['keep'], :]
+
+    if train:
+        df = df.groupby('session_id')[['session_id', 'action_time']].head(1).reset_index(drop=True)
+    else:
+        df = df[['action_time']].head(1).reset_index(drop=True)
+        
+    df['action_time'] = df['action_time'].clip(upper=50000) 
+    df = df.rename(columns={'action_time' : 'answer_time_1'})
+    return df
+
 
 def get_answer_time_2(stage3_df, stage2_path=None, retained_features=None, train=True):
     if train:
