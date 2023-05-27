@@ -408,15 +408,15 @@ def get_answer_time_1(df, train=True):
 
 def get_answer_time_2(stage3_df, stage2_path=None, retained_features=None, train=True):
     if train:
-        # data = pd.read_csv(stage2_path, dtype={'session_id':'object', 'elapsed_time':np.int32})
-        data = pd.read_parquet(stage2_path)
-        stage2_answertime = data.groupby('session_id').nth(-1)[['elapsed_time']]
-        stage3_answertime = stage3_df.groupby('session_id').nth(0)[['elapsed_time']]
+        pass
+#         data = pd.read_parquet(stage2_path)
+#         stage2_answertime = data.groupby('session_id').nth(-1)[['elapsed_time']]
+#         stage3_answertime = stage3_df.groupby('session_id').nth(0)[['elapsed_time']]
 
-        out = pd.merge(stage3_answertime, stage2_answertime, left_index=True, right_index=True, how='left')
-        out['answer_time_2'] = out['elapsed_time_x'] - out['elapsed_time_y']
-        out['answer_time_2'] = out['answer_time_2'].clip(lower=0)
-        out = out['answer_time_2'].reset_index()
+#         out = pd.merge(stage3_answertime, stage2_answertime, left_index=True, right_index=True, how='left')
+#         out['answer_time_2'] = out['elapsed_time_x'] - out['elapsed_time_y']
+#         out['answer_time_2'] = out['answer_time_2'].clip(lower=0)
+#         out = out['answer_time_2'].reset_index()
         
     else:
         sess = stage3_df['session_id'].iloc[0]
