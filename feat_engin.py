@@ -55,12 +55,12 @@ def get_general_features_1(df, stage, train=True):
         pl.col('elapsed_time').median().alias('median_elapsed_time'),
 
         #Hover duration
-        *[pl.col('hover_duration').filter(pl.col('event_name') == i).count().alias(f"{i}_duration_count") for i in ['object_hover', 'map_hover']],
-        *[pl.col('hover_duration').filter(pl.col('event_name') == i).sum().alias(f"{i}_duration_sum") for i in ['object_hover', 'map_hover']],
-        *[pl.col('hover_duration').filter(pl.col('event_name') == i).mean().alias(f"{i}_duration_mean") for i in ['object_hover', 'map_hover']],
-        *[pl.col('hover_duration').filter(pl.col('event_name') == i).std().alias(f"{i}_duration_std") for i in ['object_hover', 'map_hover']],
-        *[pl.col('hover_duration').filter(pl.col('event_name') == i).std().alias(f"{i}_duration_median") for i in ['object_hover', 'map_hover']],
-        *[pl.col('hover_duration').filter(pl.col('event_name') == i).max().alias(f"{i}_duration_max") for i in ['object_hover', 'map_hover']],
+        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).count().alias(f"{i}_duration_count") for i in ['object_hover', 'map_hover']],
+        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).sum().alias(f"{i}_duration_sum") for i in ['object_hover', 'map_hover']],
+        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).mean().alias(f"{i}_duration_mean") for i in ['object_hover', 'map_hover']],
+        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).std().alias(f"{i}_duration_std") for i in ['object_hover', 'map_hover']],
+        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).std().alias(f"{i}_duration_median") for i in ['object_hover', 'map_hover']],
+        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).max().alias(f"{i}_duration_max") for i in ['object_hover', 'map_hover']],
 
         #Number of times notebook open
         pl.col('event_name').filter(pl.col('event_name') == 'notebook_click').count().alias('total_notebook_click'),
@@ -72,8 +72,6 @@ def get_general_features_1(df, stage, train=True):
         *[pl.col('action_time').filter(pl.col('event_name') == i).std().alias(f"{i}_time_std") for i in EVENT_NAMES],
         *[pl.col('action_time').filter(pl.col('event_name') == i).median().alias(f"{i}_time_median") for i in EVENT_NAMES],
         *[pl.col('action_time').filter(pl.col('event_name') == i).max().alias(f"{i}_time_max") for i in EVENT_NAMES],
-        *[pl.col('action_time').filter(pl.col('event_name') == i).quantile(0.25, 'nearest').alias(f"{i}_time_25") for i in EVENT_NAMES],
-        *[pl.col('action_time').filter(pl.col('event_name') == i).quantile(0.75, 'nearest').alias(f"{i}_time_75") for i in EVENT_NAMES],
 
         #Count and time spent for each name
         *[pl.col('action_time').filter(pl.col('name') == i).count().alias(f"{i}_time_count") for i in NAMES],
@@ -82,8 +80,6 @@ def get_general_features_1(df, stage, train=True):
         *[pl.col('action_time').filter(pl.col('name') == i).std().alias(f"{i}_time_std") for i in NAMES],
         *[pl.col('action_time').filter(pl.col('name') == i).median().alias(f"{i}_time_median") for i in NAMES],
         *[pl.col('action_time').filter(pl.col('name') == i).max().alias(f"{i}_time_max") for i in NAMES],
-        *[pl.col('action_time').filter(pl.col('name') == i).quantile(0.25, 'nearest').alias(f"{i}_time_25") for i in NAMES],
-        *[pl.col('action_time').filter(pl.col('name') == i).quantile(0.75, 'nearest').alias(f"{i}_time_75") for i in NAMES],
 
         #Count and time per room_fqid
         *[pl.col('action_time').filter(pl.col('room_fqid') == i).count().alias(f"{i}_time_count") for i in room_fqid_list],
@@ -92,8 +88,6 @@ def get_general_features_1(df, stage, train=True):
         *[pl.col('action_time').filter(pl.col('room_fqid') == i).std().alias(f"{i}_time_std") for i in room_fqid_list],
         *[pl.col('action_time').filter(pl.col('room_fqid') == i).median().alias(f"{i}_time_median") for i in room_fqid_list],
         *[pl.col('action_time').filter(pl.col('room_fqid') == i).max().alias(f"{i}_time_max") for i in room_fqid_list],
-        *[pl.col('action_time').filter(pl.col('room_fqid') == i).quantile(0.25, 'nearest').alias(f"{i}_time_25") for i in room_fqid_list],
-        *[pl.col('action_time').filter(pl.col('room_fqid') == i).quantile(0.75, 'nearest').alias(f"{i}_time_75") for i in room_fqid_list],
 
         #Count and time per fqid
         *[pl.col('action_time').filter(pl.col('fqid') == i).count().alias(f"{i}_time_count") for i in fqid_list],
@@ -102,9 +96,6 @@ def get_general_features_1(df, stage, train=True):
         *[pl.col('action_time').filter(pl.col('fqid') == i).std().alias(f"{i}_time_std") for i in fqid_list],
         *[pl.col('action_time').filter(pl.col('fqid') == i).median().alias(f"{i}_time_median") for i in fqid_list],
         *[pl.col('action_time').filter(pl.col('fqid') == i).max().alias(f"{i}_time_max") for i in fqid_list],
-        *[pl.col('action_time').filter(pl.col('fqid') == i).quantile(0.25, 'nearest').alias(f"{i}_time_25") for i in fqid_list],
-        *[pl.col('action_time').filter(pl.col('fqid') == i).quantile(0.75, 'nearest').alias(f"{i}_time_75") for i in fqid_list],
-        
 
         #Count and time per text_fqid
         *[pl.col('action_time').filter(pl.col('text_fqid') == i).count().alias(f"{i}_time_count") for i in textfqid_list],
@@ -113,8 +104,6 @@ def get_general_features_1(df, stage, train=True):
         *[pl.col('action_time').filter(pl.col('text_fqid') == i).std().alias(f"{i}_time_std") for i in textfqid_list],
         *[pl.col('action_time').filter(pl.col('text_fqid') == i).median().alias(f"{i}_time_median") for i in textfqid_list],
         *[pl.col('action_time').filter(pl.col('text_fqid') == i).max().alias(f"{i}_time_max") for i in textfqid_list],
-        *[pl.col('action_time').filter(pl.col('text_fqid') == i).quantile(0.25, 'nearest').alias(f"{i}_time_25") for i in textfqid_list],
-        *[pl.col('action_time').filter(pl.col('text_fqid') == i).quantile(0.75, 'nearest').alias(f"{i}_time_75") for i in textfqid_list],
 
         #Time per level
         *[pl.col('action_time').filter(pl.col('level') == i).count().alias(f"action_timecount_{i}") for i in levels],
@@ -123,8 +112,6 @@ def get_general_features_1(df, stage, train=True):
         *[pl.col('action_time').filter(pl.col('level') == i).std().alias(f"action_timestd_{i}") for i in levels],
         *[pl.col('action_time').filter(pl.col('level') == i).median().alias(f"action_timemedian_{i}") for i in levels],
         *[pl.col('action_time').filter(pl.col('level') == i).max().alias(f"action_timemax_{i}") for i in levels],
-        *[pl.col('action_time').filter(pl.col('level') == i).quantile(0.25, 'nearest').alias(f"action_time25_{i}") for i in levels],
-        *[pl.col('action_time').filter(pl.col('level') == i).quantile(0.75, 'nearest').alias(f"action_time75_{i}") for i in levels],
     ]
 
     df = df.groupby(['session_id'], maintain_order=True).agg(aggs).sort('session_id')
@@ -397,6 +384,7 @@ def get_general_features_2(df, stage, train=True):
     
     
     return _train
+    
 
 def get_answer_time_1(df, train=True):
     df['relevant'] = (df['event_name'] == 'checkpoint')
