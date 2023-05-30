@@ -5,14 +5,14 @@ import polars as pl
 def get_general_features_1(df, stage, train=True):
     df = pl.DataFrame(df)
     
-    EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click','notification_click','map_click']
-    NAMES = ['basic', 'close', 'undefined']
+    EVENT_NAMES = ['navigate_click','person_click','cutscene_click','object_click','notification_click','map_click','observation_click']
+    NAMES = ['basic', 'close', 'open', 'undefined']
 
     if stage == 1:
         levels = list(range(0,5))
         room_fqid_list = ['tunic.historicalsociety.closet', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.collection', 'tunic.kohlcenter.halloffame', 'tunic.capitol_0.hall']
-        fqid_list = ['cs', 'gramps', 'groupconvo', 'notebook', 'plaque', 'plaque.face.date', 'teddy', 'toentry', 'togrampa', 'tomap', 'tunic']
-        textfqid_list = ['tunic.historicalsociety.closet.gramps.intro_0_cs_0', 'tunic.historicalsociety.closet.teddy.intro_0_cs_0',
+        fqid_list = ['cs', 'gramps', 'groupconvo', 'notebook', 'plaque', 'plaque.face.date', 'retirement_letter', 'teddy', 'toentry', 'togrampa', 'tomap', 'tunic']
+        textfqid_list = ['tunic.historicalsociety.closet.gramps.intro_0_cs_0', 'tunic.historicalsociety.closet.retirement_letter.hub', 'tunic.historicalsociety.closet.teddy.intro_0_cs_0',
                          'tunic.historicalsociety.entry.groupconvo','tunic.kohlcenter.halloffame.plaque.face.date','tunic.kohlcenter.halloffame.togrampa']
     elif stage == 2:
         levels = list(range(5,13))
@@ -29,8 +29,8 @@ def get_general_features_1(df, stage, train=True):
     elif stage == 3:
         levels = list(range(13,23))
         room_fqid_list = ['tunic.historicalsociety.basement', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
-        fqid_list = ['archivist_glasses', 'boss', 'ch3start', 'chap4_finale_c', 'coffee', 'colorbook', 'confrontation', 'crane_ranger', 'directory', 'expert', 'flag_girl',
-                     'glasses', 'gramps', 'groupconvo_flag', 'journals_flag', 'journals_flag.hub.topics', 'journals_flag.pic_0.bingo', 'key', 'reader_flag',
+        fqid_list = ['archivist_glasses', 'boss', 'ch3start', 'chap4_finale_c', 'coffee', 'colorbook', 'confrontation', 'crane_ranger', 'directory', 'directory.closeup.archivist', 'expert', 'flag_girl',
+                     'glasses', 'gramps', 'groupconvo_flag', 'journals_flag', 'journals_flag.hub.topics', 'journals_flag.pic_0.bingo', 'journals_flag.pic_0.next', 'key', 'lockeddoor', 'reader_flag',
                      'reader_flag.paper0.next', 'reader_flag.paper2.bingo', 'remove_cup', 'savedteddy', 'seescratches', 'teddy', 'tobasement', 'tocage', 'toentry', 'tofrontdesk', 'tomap', 'tostacks',
                      'tracks', 'tracks.hub.deer', 'tunic.capitol_2', 'tunic.drycleaner', 'tunic.flaghouse', 'tunic.historicalsociety', 'tunic.library', 'tunic.wildlife', 'unlockdoor']
         textfqid_list = ['tunic.flaghouse.entry.flag_girl.hello', 'tunic.flaghouse.entry.flag_girl.symbol', 'tunic.historicalsociety.basement.ch3start', 'tunic.historicalsociety.basement.savedteddy',
@@ -53,14 +53,6 @@ def get_general_features_1(df, stage, train=True):
         pl.col('elapsed_time').mean().alias('mean_elapsed_time'),
         pl.col('elapsed_time').std().alias('stddev_elapsed_time'),
         pl.col('elapsed_time').median().alias('median_elapsed_time'),
-
-        #Hover duration
-        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).count().alias(f"{i}_duration_count") for i in ['object_hover', 'map_hover']],
-        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).sum().alias(f"{i}_duration_sum") for i in ['object_hover', 'map_hover']],
-        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).mean().alias(f"{i}_duration_mean") for i in ['object_hover', 'map_hover']],
-        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).std().alias(f"{i}_duration_std") for i in ['object_hover', 'map_hover']],
-        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).std().alias(f"{i}_duration_median") for i in ['object_hover', 'map_hover']],
-        # *[pl.col('hover_duration').filter(pl.col('event_name') == i).max().alias(f"{i}_duration_max") for i in ['object_hover', 'map_hover']],
 
         #Number of times notebook open
         pl.col('event_name').filter(pl.col('event_name') == 'notebook_click').count().alias('total_notebook_click'),
@@ -125,8 +117,8 @@ def get_general_features_2(df, stage, train=True):
     # Time per level and event
     COLS = []
     EVENT_AT_LEVEL_STG1 = {
-        'level0_events' : ['navigate_click', 'person_click'],
-        'level1_events' : ['cutscene_click', 'navigate_click'],
+        'level0_events' : ['navigate_click', 'object_click', 'person_click'],
+        'level1_events' : ['cutscene_click', 'navigate_click', 'object_click'],
         'level2_events' : ['cutscene_click', 'navigate_click', 'notification_click', 'object_click'],
         'level3_events' : ['cutscene_click', 'navigate_click', 'notification_click', 'object_click'],
         'level4_events' : ['navigate_click']
@@ -197,13 +189,13 @@ def get_general_features_2(df, stage, train=True):
     tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
 
     if stage == 1:
-        cols_needed = ['0_basic', '0_undefined', '1_basic', '1_undefined', '2_basic', '2_undefined', '3_basic', '3_undefined','4_undefined']
+        cols_needed = ['0_basic', '0_undefined', '1_basic', '1_undefined', '2_basic', '2_undefined', '3_basic', '3_undefined', '4_basic', '4_undefined']
     elif stage == 2:
         cols_needed = ['5_basic', '5_undefined', '6_basic',  '6_undefined', '7_basic', '7_undefined', '8_basic',  '8_undefined', '9_basic',  '9_undefined', '10_basic', '10_undefined', '11_basic', 
-                       '11_undefined', '12_basic', '12_undefined']
+                       '11_undefined', '12_basic', '12_open', '12_prev', '12_undefined']
     elif stage == 3:
-        cols_needed = ['13_basic', '13_undefined', '14_basic', '14_undefined', '15_basic', '15_undefined', '16_basic', '16_undefined', '17_basic', '17_undefined', '18_basic', '18_undefined', 
-                       '19_basic', '19_undefined', '20_basic', '20_undefined', '21_basic', '21_undefined', '22_basic', '22_undefined']
+        cols_needed = ['13_basic', '13_undefined', '14_basic', '14_undefined', '15_basic', '15_undefined', '16_basic', '16_undefined', '17_basic', '17_undefined', '18_basic', '18_close', '18_undefined', 
+                       '19_basic', '19_close', '19_undefined', '20_basic', '20_undefined', '21_basic', '21_close', '21_undefined', '22_basic', '22_undefined']
 
     COLS = []
     COLS.extend([i + '_action_timesum' for i in cols_needed])
@@ -231,17 +223,19 @@ def get_general_features_2(df, stage, train=True):
     tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
 
     if stage == 1:
-        cols_needed = ['0_gramps', '0_notebook', '0_teddy', '1_groupconvo', '2_cs', '2_gramps', '2_tunic', '3_plaque', '3_plaque.face.date', '3_toentry', '3_togrampa']
+        cols_needed = ['0_gramps', '0_notebook', '0_teddy', '1_groupconvo', '2_cs', '2_gramps', '2_tunic', '2_tunic.hub.slip', '3_plaque', '3_plaque.face.date', '3_toentry', '3_togrampa', '3_tomap', 
+                       '4_toentry']
     elif stage == 2:
         cols_needed = ['5_toentry', '5_what_happened', '6_archivist','6_gramps', '6_magnify', '6_trigger_coffee', '6_trigger_scarf', '7_businesscards', '7_businesscards.card_0.next', 
                        '7_businesscards.card_1.next', '7_businesscards.card_bingo.bingo', '7_tomap', '7_worker', '8_logbook', '8_logbook.page.bingo', '8_worker', '9_reader', '9_reader.paper0.next', 
-                       '9_reader.paper2.bingo', '9_worker', '10_wellsbadge', '10_worker', '11_archivist', '11_journals', '11_journals.hub.topics', 
+                       '9_reader.paper1.next', '9_reader.paper2.bingo', '9_toentry', '9_worker', '10_wellsbadge', '10_worker', '11_archivist', '11_journals', '11_journals.hub.topics', 
                        '11_journals.pic_0.next', '11_journals.pic_1.next', '11_journals.pic_2.bingo', '11_toentry', '11_tostacks', '12_chap2_finale_c', '12_tomap']
     elif stage == 3:
-        cols_needed = ['13_ch3start', '13_seescratches', '13_toentry', '14_glasses', '14_teddy', '15_glasses', '15_key', '16_confrontation', '16_unlockdoor', '17_gramps', '17_savedteddy', '18_boss',
-                       '18_coffee', '18_crane_ranger', '18_expert', '18_groupconvo_flag', '18_remove_cup', '18_tomap', '18_tracks', '18_tracks.hub.deer', '18_wells', '19_colorbook', '19_flag_girl', 
-                       '19_tomap', '20_reader_flag', '20_reader_flag.paper0.next', '20_reader_flag.paper2.bingo', '20_worker', '21_archivist_glasses', '21_journals_flag',
-                       '21_journals_flag.hub.topics', '21_journals_flag.pic_0.bingo', '21_toentry', '21_tofrontdesk', '21_tostacks', '21_worker', '22_chap4_finale_c']
+        cols_needed = ['13_ch3start', '13_seescratches', '13_toentry', '14_glasses', '14_lockeddoor', '14_teddy', '15_directory', '15_directory.closeup.archivist', '15_glasses', '15_key', 
+                       '16_confrontation', '16_unlockdoor', '17_gramps', '17_savedteddy', '18_boss', '18_coffee', '18_crane_ranger', '18_expert', '18_groupconvo_flag', '18_remove_cup', '18_tomap', 
+                       '18_tracks', '18_tracks.hub.deer', '18_wells', '19_colorbook', '19_flag_girl', '19_tomap', '20_reader_flag', '20_reader_flag.paper0.next', '20_reader_flag.paper2.bingo', 
+                       '20_tomap', '20_worker', '21_archivist_glasses', '21_journals_flag', '21_journals_flag.hub.topics', '21_journals_flag.pic_0.bingo', '21_journals_flag.pic_0.next', '21_toentry', 
+                       '21_tofrontdesk', '21_tostacks', '21_worker', '22_chap4_finale_c', '22_tomap']
 
     COLS = []
     COLS.extend([i + '_action_timesum' for i in cols_needed])
@@ -266,7 +260,7 @@ def get_general_features_2(df, stage, train=True):
     COLS = []
     ROOM_AT_LEVEL_STG1 = {
             'level0_rooms' : ['tunic.historicalsociety.closet'],
-            'level1_rooms' : ['tunic.historicalsociety.entry'],
+            'level1_rooms' : ['tunic.historicalsociety.basement', 'tunic.historicalsociety.closet', 'tunic.historicalsociety.entry'],
             'level2_rooms' : ['tunic.historicalsociety.collection', 'tunic.historicalsociety.entry'],
             'level3_rooms' : ['tunic.historicalsociety.collection', 'tunic.historicalsociety.entry', 'tunic.kohlcenter.halloffame'],
             'level4_rooms' : ['tunic.capitol_0.hall', 'tunic.kohlcenter.halloffame']
@@ -280,20 +274,20 @@ def get_general_features_2(df, stage, train=True):
             'level9_rooms' : ['tunic.drycleaner.frontdesk', 'tunic.library.frontdesk', 'tunic.library.microfiche'],
             'level10_rooms' : ['tunic.library.frontdesk', 'tunic.library.microfiche'],
             'level11_rooms' : ['tunic.historicalsociety.frontdesk', 'tunic.historicalsociety.stacks', 'tunic.library.frontdesk'],
-            'level12_rooms' : ['tunic.capitol_1.hall', 'tunic.historicalsociety.entry']
+            'level12_rooms' : ['tunic.capitol_1.hall', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
         }
 
     ROOM_AT_LEVEL_STG3 = {
             'level13_rooms' : ['tunic.capitol_1.hall', 'tunic.historicalsociety.basement'],
             'level14_rooms' : ['tunic.historicalsociety.cage'],
             'level15_rooms' : ['tunic.historicalsociety.cage', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.frontdesk'],
-            'level16_rooms' : ['tunic.historicalsociety.cage'],
+            'level16_rooms' : ['tunic.historicalsociety.cage', 'tunic.historicalsociety.frontdesk'],
             'level17_rooms' : ['tunic.historicalsociety.basement', 'tunic.historicalsociety.cage', 'tunic.historicalsociety.collection_flag', 'tunic.historicalsociety.entry'],
             'level18_rooms' : ['tunic.historicalsociety.collection_flag', 'tunic.historicalsociety.entry', 'tunic.wildlife.center'],
             'level19_rooms' : ['tunic.flaghouse.entry', 'tunic.wildlife.center'],
             'level20_rooms' : ['tunic.flaghouse.entry', 'tunic.library.frontdesk', 'tunic.library.microfiche'],
             'level21_rooms' : ['tunic.historicalsociety.frontdesk', 'tunic.historicalsociety.stacks', 'tunic.library.frontdesk', 'tunic.library.microfiche'],
-            'level22_rooms' : ['tunic.capitol_2.hall', 'tunic.historicalsociety.entry',]
+            'level22_rooms' : ['tunic.capitol_2.hall', 'tunic.historicalsociety.entry', 'tunic.historicalsociety.stacks']
         }
 
 
@@ -334,53 +328,6 @@ def get_general_features_2(df, stage, train=True):
     _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
     
     
-    # Time per level and text_fqid
-    tmp = df.groupby(['session_id', 'level', 'text_fqid']).agg({'action_time' : ['sum', 'mean', 'std', 'median', 'max', 'count']})
-    tmp.columns = tmp.columns.map(''.join)
-    tmp_pivot = tmp.pivot_table(index='session_id', columns=['level', 'text_fqid'], values=['action_timesum', 'action_timemean', 'action_timestd', 'action_timemedian', 'action_timemax', 
-                                                                                            'action_timecount'])
-    tmp_pivot.columns = [str(i[1]) + '_' + i[2] + '_' + i[0] for i in tmp_pivot.columns]
-
-    if stage == 1:
-        cols_needed = ['0_tunic.historicalsociety.closet.gramps.intro_0_cs_0', '0_tunic.historicalsociety.closet.teddy.intro_0_cs_0', '1_tunic.historicalsociety.entry.groupconvo', 
-                       '2_tunic.historicalsociety.collection.cs', '2_tunic.historicalsociety.collection.gramps.found', '2_tunic.historicalsociety.collection.tunic.slip', 
-                       '3_tunic.kohlcenter.halloffame.plaque.face.date', '3_tunic.kohlcenter.halloffame.togrampa']
-
-    elif stage == 2:
-        cols_needed = ['5_tunic.historicalsociety.closet_dirty.what_happened', '6_tunic.historicalsociety.closet_dirty.gramps.news', '6_tunic.historicalsociety.closet_dirty.trigger_coffee', 
-                       '6_tunic.historicalsociety.closet_dirty.trigger_scarf', '6_tunic.historicalsociety.frontdesk.archivist.have_glass', '6_tunic.historicalsociety.frontdesk.archivist.hello', 
-                       '7_tunic.humanecology.frontdesk.worker.intro', '8_tunic.drycleaner.frontdesk.logbook.page.bingo', '8_tunic.drycleaner.frontdesk.worker.hub', 
-                       '9_tunic.drycleaner.frontdesk.worker.done', '9_tunic.library.frontdesk.worker.hello', '9_tunic.library.microfiche.reader.paper2.bingo', '10_tunic.library.frontdesk.worker.wells', 
-                       '11_tunic.historicalsociety.frontdesk.archivist.newspaper', '11_tunic.historicalsociety.stacks.journals.pic_2.bingo']
-
-    elif stage == 3:
-        cols_needed = ['13_tunic.historicalsociety.basement.ch3start', '13_tunic.historicalsociety.basement.seescratches', '14_tunic.historicalsociety.cage.teddy.trapped', 
-                       '15_tunic.historicalsociety.cage.glasses.afterteddy', '16_tunic.historicalsociety.cage.confrontation', 
-                       '16_tunic.historicalsociety.cage.unlockdoor', '17_tunic.historicalsociety.basement.savedteddy', '17_tunic.historicalsociety.collection_flag.gramps.flag', 
-                       '18_tunic.historicalsociety.entry.boss.flag', '18_tunic.historicalsociety.entry.groupconvo_flag', '18_tunic.historicalsociety.entry.wells.flag', 
-                       '18_tunic.wildlife.center.crane_ranger.crane', '18_tunic.wildlife.center.expert.removed_cup', '18_tunic.wildlife.center.wells.animals', '18_tunic.wildlife.center.wells.nodeer', 
-                       '19_tunic.flaghouse.entry.flag_girl.hello', '19_tunic.flaghouse.entry.flag_girl.symbol', '20_tunic.library.frontdesk.worker.flag', 
-                       '21_tunic.historicalsociety.frontdesk.archivist_glasses.confrontation', '21_tunic.library.frontdesk.worker.nelson']
-        
-    COLS = []
-    COLS.extend([i + '_action_timesum' for i in cols_needed])
-    COLS.extend([i + '_action_timemean' for i in cols_needed])
-    COLS.extend([i + '_action_timestd' for i in cols_needed])
-    COLS.extend([i + '_action_timemedian' for i in cols_needed])
-    COLS.extend([i + '_action_timemax' for i in cols_needed])
-    COLS.extend([i + '_action_timecount' for i in cols_needed])
-
-    if train == False:
-        missing_cols = np.array(COLS)[~np.isin(COLS, tmp_pivot.columns)]
-        for _col in missing_cols:
-            tmp_pivot[_col] = 0
-
-
-    tmp_pivot = tmp_pivot[COLS]
-    tmp_pivot = tmp_pivot.reset_index()
-    _train = pd.merge(left=_train, right=tmp_pivot, on='session_id', how='left')
-    
-    
     return _train
     
 
@@ -406,15 +353,15 @@ def get_answer_time_1(df, train=True):
 
 def get_answer_time_2(stage3_df, stage2_path=None, retained_features=None, train=True):
     if train:
-        pass
-#         data = pd.read_parquet(stage2_path)
-#         stage2_answertime = data.groupby('session_id').nth(-1)[['elapsed_time']]
-#         stage3_answertime = stage3_df.groupby('session_id').nth(0)[['elapsed_time']]
+        # data = pd.read_csv(stage2_path, dtype={'session_id':'object', 'elapsed_time':np.int32})
+        data = pd.read_parquet(stage2_path)
+        stage2_answertime = data.groupby('session_id').nth(-1)[['elapsed_time']]
+        stage3_answertime = stage3_df.groupby('session_id').nth(0)[['elapsed_time']]
 
-#         out = pd.merge(stage3_answertime, stage2_answertime, left_index=True, right_index=True, how='left')
-#         out['answer_time_2'] = out['elapsed_time_x'] - out['elapsed_time_y']
-#         out['answer_time_2'] = out['answer_time_2'].clip(lower=0)
-#         out = out['answer_time_2'].reset_index()
+        out = pd.merge(stage3_answertime, stage2_answertime, left_index=True, right_index=True, how='left')
+        out['answer_time_2'] = out['elapsed_time_x'] - out['elapsed_time_y']
+        out['answer_time_2'] = out['answer_time_2'].clip(lower=0)
+        out = out['answer_time_2'].reset_index()
         
     else:
         sess = stage3_df['session_id'].iloc[0]
