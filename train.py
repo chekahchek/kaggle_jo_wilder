@@ -26,7 +26,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     seed_everything(args.seed)
-
+    os.makedirs('models')
     
     def run_single_fold(fold, train_idx, val_idx, question, threshold):
         def objective(trial, X_train=train.loc[train_idx, features], X_val=train.loc[val_idx, features],\
@@ -66,7 +66,7 @@ if __name__ == '__main__':
         study = optuna.create_study(direction='maximize')
         study.optimize(objective, n_trials=args.n_trials)
         print('Best trial:', study.best_trial.params)
-        
+
         if args.model == 'lightgbm':
             best_model = LGBMClassifier(**study.best_trial.params)
             best_model.fit(train.loc[train_idx, features], train.loc[train_idx, question], \
@@ -77,42 +77,42 @@ if __name__ == '__main__':
             best_model.fit(train.loc[train_idx, features], train.loc[train_idx, question], \
                         eval_set=[(train.loc[val_idx, features], train.loc[val_idx, question])],\
                         early_stopping_rounds=50, verbose=None)
-            
-                            
+
+
         preds = best_model.predict_proba(train.loc[val_idx, features].values)
         preds = preds[:, 1]
-        
+
         valid_sessions = train.loc[val_idx, 'session_id'].values
         _oof = pd.DataFrame({'session_id': valid_sessions, question: preds})
-        
+
         preds = (preds >= threshold).astype(int)
         y_val = train.loc[val_idx, question]
         score = f1_score(y_val, preds, average='macro')
-        
+
         if args.model == 'lightgbm':
             cols = best_model.feature_name_  + ['f1', 'fold', 'question']
-            pickle.dump(best_model, open(f"{args.model}_fold{fold}_q{question}", "wb"))
+            pickle.dump(best_model, open(f"./models/{args.model}_fold{fold}_q{question}", "wb"))
         elif args.model == 'catboost':
             cols = best_model.feature_names_  + ['f1', 'fold', 'question']
-            pickle.dump(best_model, open(f"{args.model}_fold{fold}_q{question}", "wb"))
-            
-            
+            pickle.dump(best_model, open(f"./models/{args.model}_fold{fold}_q{question}", "wb"))
+
+
         values = np.concatenate((best_model.feature_importances_ , [score, fold, question])).reshape(1, -1) 
         feat_impt = pd.DataFrame(values, columns=cols)
         print(f"Best {args.model} at fold {fold} question {question} has F1 score = {score:.4f}")
-        
+
         del best_model
         gc.collect()
     
-    return feat_impt, _oof
+        return feat_impt, _oof
 
 
     for level_groups in args.level_groups:
-        data = pd.read_parquet(f"/kaggle/input/jo-wilder-data/level_groups_{level_groups}.parquet")
+        data = pd.read_parquet(f"./data/level_groups_{level_groups}.parquet")
         train = prepare_data(data, level_groups, train=True)
 
         if level_groups == "13-22":
-            out = get_answer_time_2(data, stage2_path=f'/kaggle/input/jo-wilder-data/level_groups_{level_groups}.parquet')
+            out = get_answer_time_2(data, stage2_path=f'./data/level_groups_{level_groups}.parquet')
             train = pd.merge(train, out, left_on='session_id', right_on='session_id', how='left')
         
         if level_groups == "0-4":
@@ -128,17 +128,14 @@ if __name__ == '__main__':
         oof_out = None
         gkf = GroupKFold(n_splits=args.folds)
         
-
         for ii, question in enumerate(targets):
             oof = []
             print(f"{'-' * 30} Question : {question} {'-' * 30}")
-
             for fold, (train_idx, val_idx) in enumerate(gkf.split(X=train, groups=train['session_id'])):
                 print(f" {'-' * 30} Fold : {fold} {'-' * 30} ")
                 feat_impt, _oof = run_single_fold(fold, train_idx, val_idx, question, args.threshold)
                 feat_impt_df.append(feat_impt)
                 oof.append(_oof)
-
 
             oof = pd.concat(oof, axis=0)
             if oof_out is None:
@@ -147,8 +144,8 @@ if __name__ == '__main__':
                 oof_out[question] = oof[question]
 
         feat_impt_out = pd.concat(feat_impt_df, axis=0)
-        feat_impt_out.to_csv(f'feature_importance_stage{level_groups}.csv', index=False)
-        oof_out.to_csv(f'oof_level_groups_{level_groups}.csv', index=False)
+        feat_impt_out.to_csv(f'./models/feature_importance_stage{level_groups}.csv', index=False)
+        oof_out.to_csv(f'./models/oof_level_groups_{level_groups}.csv', index=False)
         
         del data
         del train

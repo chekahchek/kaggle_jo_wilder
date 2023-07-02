@@ -6,7 +6,6 @@ import polars as pl
 
 def get_answer_time_2(stage3_df, stage2_path=None, retained_features=None, train=True):
     if train:
-        # data = pd.read_csv(stage2_path, dtype={'session_id':'object', 'elapsed_time':np.int32})
         data = pd.read_parquet(stage2_path)
         stage2_answertime = data.groupby('session_id').nth(-1)[['elapsed_time']]
         stage3_answertime = stage3_df.groupby('session_id').nth(0)[['elapsed_time']]
@@ -220,6 +219,9 @@ def feature_engineer(x, level_groups, feature_suffix):
 
 
 def prepare_data(data, level_groups, train=True):
+    if not train:
+        data = data.sort_values(by='index')
+    
     columns = [
     pl.col("page").cast(pl.Float32),
     (
@@ -250,7 +252,7 @@ def prepare_data(data, level_groups, train=True):
     df = df.fillna(0)
     
     if train:
-        labels = pd.read_csv('./train_labels.csv')
+        labels = pd.read_csv('./data/train_labels.csv')
         if level_groups == "0-4":
             labels = labels.loc[labels['question'] <= 3, :]
         elif level_groups == "5-12":
