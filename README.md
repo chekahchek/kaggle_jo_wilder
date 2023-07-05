@@ -1,5 +1,5 @@
 # Predict Student Performance from Game Play
-
+ 
 ## Introduction
 This repository contains the source code for [Predict Student Performance from Game Play](https://www.kaggle.com/competitions/predict-student-performance-from-game-play) kaggle competition. Objective of the competition is to predict how well a student will score in quizes in an EdTech game based on their interactions during the gameplay. 
 
